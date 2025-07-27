@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Ignore test folder in src
+src/test/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
