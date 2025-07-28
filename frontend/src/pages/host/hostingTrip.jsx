@@ -1,6 +1,10 @@
+import {useOutletContext, useNavigate} from "react-router-dom"
 import {useRef} from "react"
 
-const HostingTrip = ({onNewhostings}) => {
+const HostingTrip = () => {
+  const {handleNewTripHostings} = useOutletContext()
+  const navigate = useNavigate()
+
   const pickupCityRef = useRef()
   const exactPickupRef = useRef()
   const dropCityRef = useRef()
@@ -19,13 +23,14 @@ const HostingTrip = ({onNewhostings}) => {
     const date = dateRef.current.value // Get date value
 
     // Call parent handler to send data to backend
-    if (onNewhostings) {
-      onNewhostings(pickupCity, exactPickup, exactDrop, dropCity, fare, date) // Pass date to handler
-    }
+    handleNewTripHostings(pickupCity, exactPickup, exactDrop, dropCity, fare)
+
+    navigate("/host/trips")
   }
 
   return (
-    <form onSubmit={handleFormSubmissionValues} className="max-w-md mx-auto bg-white rounded-lg shadow-md p-6 flex flex-col gap-4 mt-8">
+    <form onSubmit={handleFormSubmissionValues} className="max-w-md mx-auto bg-white rounded-xl shadow-lg p-6">
+      <h2 className="text-2xl font-bold mb-6">Host a New Trip</h2>
       <div>
         <label htmlFor="pickup-city" className="block text-sm font-medium mb-1">
           Pick-Up City
