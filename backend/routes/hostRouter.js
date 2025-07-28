@@ -5,8 +5,6 @@ const hostRouter = express.Router()
 const hostController = require("../controllers/hostController")
 
 hostRouter.post("/", hostController.createHostedTrip)
-// todoItemsRouter.get("/", todoItemsController.getTodoItems);
-// todoItemsRouter.delete("/:id", todoItemsController.deleteTodoItem);
-// todoItemsRouter.put("/:id/completed", todoItemsController.markCompleted);
+hostRouter.get("/", hostController.getTripList)
 
 module.exports = hostRouter

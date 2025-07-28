@@ -9,7 +9,16 @@ const hostRouter = require("./routes/hostRouter")
 
 const {default: mongoose} = require("mongoose")
 const app = express()
-app.use(cors())
+
+// Configure CORS with specific options
+app.use(
+  cors({
+    origin: "http://localhost:5173", // Your frontend Vite default port
+    methods: ["GET", "POST"],
+    allowedHeaders: ["Content-Type"],
+  })
+)
+
 app.use(express.urlencoded())
 app.use(express.json())
 // app.use((req, res, next) => {

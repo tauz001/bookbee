@@ -4,6 +4,7 @@ import Userbooking from "./components/user/userbooking"
 import UserBookingsList from "./components/user/userBookingsList"
 import HostingTrip from "./components/host/hostingTrip"
 import {hostTripToServer} from "./services/hostService"
+import TripsList from "./components/user/tripList"
 
 function App() {
   const [hostedTrips, setHostedTrip] = useState([])
@@ -26,6 +27,7 @@ function App() {
     <>
       <Userbooking />
       <UserBookingsList />
+      <TripsList />
       <HostingTrip onNewhostings={handleNewTripHostings} />
     </>
   )

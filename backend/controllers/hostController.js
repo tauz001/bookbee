@@ -7,3 +7,13 @@ exports.createHostedTrip = async (req, res, next) => {
   await hostedTrip.save()
   res.status(201).json(hostedTrip)
 }
+
+// Change TripList to getTripList to match router
+exports.getTripList = async (req, res) => {
+  try {
+    const trips = await HostedTrip.find()
+    res.status(200).json(trips)
+  } catch (error) {
+    res.status(500).json({message: error.message})
+  }
+}
