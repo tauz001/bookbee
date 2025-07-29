@@ -1,4 +1,4 @@
-import {Link} from "react-router-dom"
+import {Link, NavLink} from "react-router-dom"
 
 export default function Homepage() {
   return (
@@ -6,19 +6,19 @@ export default function Homepage() {
       {/* Navbar */}
       <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-          <Link to="/" className="text-2xl font-bold text-yellow-600">
+          <NavLink to="/" className="text-2xl font-bold text-yellow-600">
             BookBee
-          </Link>
+          </NavLink>
           <div className="space-x-6 text-sm font-medium text-gray-700">
-            <Link to="/book" className="hover:text-yellow-600">
-              Book
-            </Link>
-            <Link to="/bookings" className="hover:text-yellow-600">
+            <NavLink to="/trips" className="hover:text-yellow-600">
+              Book Ride
+            </NavLink>
+            <NavLink to="/bookings" className="hover:text-yellow-600">
               My Bookings
-            </Link>
-            <Link to="/host/trips" className="hover:text-yellow-600">
+            </NavLink>
+            <NavLink to="/host/trips" className="hover:text-yellow-600">
               Host
-            </Link>
+            </NavLink>
           </div>
         </div>
       </nav>
