@@ -60,7 +60,7 @@ const Userbooking = () => {
           {bookingType === "reserveSeat" && <SeatBookingUi />}
           {bookingType === "reserveCab" && <CabBookingUi />}
         </div>
-        <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition">
+        <button type="submit" className="w-full bg-yellow-400 text-white py-2 rounded hover:bg-yellow-500 transition">
           Submit
         </button>
       </form>

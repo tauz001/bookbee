@@ -59,18 +59,18 @@ const TripsList = () => {
               <div className="flex items-center gap-2 text-gray-600">
                 <FaUser className="text-gray-400" />
                 <span className="text-sm">Hosted by @user123</span>
-                <span className="ml-auto text-yellow-500">★ 4.5</span>
+                <span className="ml-auto text-blue-600">★ 4.5</span>
               </div>
 
               {/* Price and Book Button */}
               <div className="flex items-center justify-between pt-4 border-t border-gray-100">
                 <div>
                   <p className="text-sm text-gray-500">Price per seat</p>
-                  <p className="font-bold text-xl text-blue-600">₹{trip.fare}</p>
+                  <p className="font-bold text-xl text-yellow-600">₹{trip.fare}</p>
                 </div>
                 <button
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg 
-                           hover:bg-blue-700 transition-colors duration-200"
+                  className="bg-yellow-400 text-white font-bold hover:text-black hover:font-bold px-4 py-2 rounded-lg 
+                           hover:bg-yellow-500 transition-colors duration-200"
                   onClick={() => handleBooking(trip._id)}>
                   Book Now
                 </button>

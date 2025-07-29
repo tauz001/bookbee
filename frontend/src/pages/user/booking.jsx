@@ -1,24 +1,33 @@
-import vehicleImg from "../../assets/vehicleImg01.jpg"
+import vehicleImg from "../../assets/vehicleImg01.jpg";
 
 const Booking = () => {
+  
   return (
-    <div className="max-w-sm mx-auto bg-white rounded-lg shadow-md overflow-hidden">
-      <img src={vehicleImg} alt="vehicle" className="w-full h-40 object-cover" />
-      <div className="p-4 flex flex-col gap-2">
+    <div className="max-w-md mx-auto bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition overflow-hidden">
+      {/* Image */}
+      <div className="h-40 bg-gray-100">
+        <img src={vehicleImg} alt="vehicle" className="w-full h-full object-cover" />
+      </div>
+
+      {/* Content */}
+      <div className="p-5 space-y-4">
+        {/* Route & Date */}
         <div>
-          <h3 className="text-lg font-semibold">Shahganj to Lucknow</h3>
-          <h5 className="text-sm text-gray-500">on date 01-01-2000</h5>
-          <a href="#" className="text-blue-500 underline text-xs">
-            more info. about our Booking..
+          <h3 className="text-lg font-semibold text-gray-800">Shahganj to Lucknow</h3>
+          <p className="text-sm text-gray-500">On: <span className="font-medium">01-01-2000</span></p>
+          <a href="#" className="text-sm text-blue-600 hover:underline">
+            View booking details
           </a>
         </div>
-        <div className="flex justify-between items-center mt-2">
-          <h4 className="text-sm font-medium">Listed By @user01</h4>
-          <h5 className="text-sm text-yellow-600">Rating : 4.9</h5>
+
+        {/* Host & Rating */}
+        <div className="flex items-center justify-between border-t pt-4">
+          <p className="text-sm text-gray-600">Listed by <span className="font-medium text-gray-800">@user01</span></p>
+          <p className="text-sm text-yellow-600 font-medium">★ 4.9</p>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Booking
+export default Booking;

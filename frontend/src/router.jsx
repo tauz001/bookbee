@@ -6,8 +6,13 @@ import TripsList from "./pages/user/userTripList"
 import HostingTrip from "./pages/host/hostingTrip"
 import HostTripList from "./pages/host/hostTripList"
 import EditTrip from "./pages/host/editTrip"
+import Homepage from "./pages/common/homePage"
 
 export const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <Homepage />,
+  },
   {
     path: "/",
     element: <App />,
