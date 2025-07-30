@@ -6,6 +6,7 @@ const cors = require("cors")
 
 //Local Module
 const hostRouter = require("./routes/hostRouter")
+const storeRouter = require("./routes/storeRouter")
 
 const {default: mongoose} = require("mongoose")
 const app = express()
@@ -26,6 +27,7 @@ app.use(express.json())
 //   next()
 // })
 app.use("/api/hostingTrip", hostRouter)
+app.use("/api/booking", storeRouter)
 
 const PORT = 3000
 const DB_PATH = "mongodb+srv://root:tauz001@bookbee.4xj0vww.mongodb.net/?retryWrites=true&w=majority&appName=BookBee"

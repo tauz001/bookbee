@@ -1,14 +1,43 @@
 import {useState} from "react"
 
-const SeatBookingUi = ({selectedTripDetails}) => {
+const SeatBookingUi = ({selectedTripDetails, onFormDataChange}) => {
   const [selectedPickup, setSelectedPickup] = useState("")
+  const [selectedDrop, setSelectedDrop] = useState("")
+  const [selectedDate, setSelectedDate] = useState("")
 
   if (!selectedTripDetails) return <p>Loading trip details...</p>
 
   const {pickupCity, dropCity, exactPickup, exactDrop} = selectedTripDetails
 
+  const updateParent = (pickup, drop, date) => {
+    const pickupCityOrigin = exactPickup.includes(pickup) ? pickupCity : dropCity
+    const dropCityDestination = exactPickup.includes(drop) ? pickupCity : dropCity
+
+    onFormDataChange({
+      pickupCity: pickupCityOrigin,
+      exactPickup: pickup,
+      dropCity: dropCityDestination,
+      exactDrop: drop,
+      ondate: date,
+    })
+  }
+
   const handlePickup = e => {
-    setSelectedPickup(e.target.value)
+    const val = e.target.value
+    setSelectedPickup(val)
+    updateParent(val, selectedDrop, selectedDate)
+  }
+
+  const handleDrop = e => {
+    const val = e.target.value
+    setSelectedDrop(val)
+    updateParent(selectedPickup, val, selectedDate)
+  }
+
+  const handleDate = e => {
+    const val = e.target.value
+    setSelectedDate(val)
+    updateParent(selectedPickup, selectedDrop, val)
   }
 
   const isPickupFromPickupCity = exactPickup.includes(selectedPickup)
@@ -16,12 +45,12 @@ const SeatBookingUi = ({selectedTripDetails}) => {
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Pickup Select */}
+      {/* Pickup */}
       <div>
-        <label htmlFor="pickUp" className="block text-sm font-medium mb-1">
+        <label htmlFor="pickup" className="block text-sm font-medium mb-1">
           Choose Pick-Up
         </label>
-        <select name="pickUp" id="pickUp" onChange={handlePickup} className="w-full border rounded px-3 py-2">
+        <select id="pickup" onChange={handlePickup} className="w-full border rounded px-3 py-2">
           <option value="">-- Select Pick-Up --</option>
           <optgroup label={pickupCity}>
             {exactPickup.map((point, idx) => (
@@ -40,14 +69,13 @@ const SeatBookingUi = ({selectedTripDetails}) => {
         </select>
       </div>
 
-      {/* Drop Select */}
+      {/* Drop */}
       <div>
         <label htmlFor="drop" className="block text-sm font-medium mb-1">
           Choose Drop
         </label>
-        <select name="drop" id="drop" className="w-full border rounded px-3 py-2">
+        <select id="drop" onChange={handleDrop} className="w-full border rounded px-3 py-2">
           <option value="">-- Select Drop --</option>
-
           {isPickupFromPickupCity && (
             <optgroup label={dropCity}>
               {exactDrop.map((point, idx) => (
@@ -57,7 +85,6 @@ const SeatBookingUi = ({selectedTripDetails}) => {
               ))}
             </optgroup>
           )}
-
           {isPickupFromDropCity && (
             <optgroup label={pickupCity}>
               {exactPickup.map((point, idx) => (
@@ -70,10 +97,10 @@ const SeatBookingUi = ({selectedTripDetails}) => {
         </select>
       </div>
 
-      {/* Date Input */}
+      {/* Date */}
       <div>
         <label className="block text-sm font-medium mb-1">Date</label>
-        <input type="date" className="w-full border rounded px-3 py-2" />
+        <input type="date" value={selectedDate} onChange={handleDate} className="w-full border rounded px-3 py-2" />
       </div>
     </div>
   )

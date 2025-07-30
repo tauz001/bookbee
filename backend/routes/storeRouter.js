@@ -1,7 +1,6 @@
-const express = require('express')
+const express = require("express")
 
 const storeRouter = express()
+const storeController = require("../controllers/storeController")
 
-storeRouter.post('/', (req, res, next)=>{
-  req.body
-})
+storeRouter.post("/", storeController.createUserSeatBooking)
