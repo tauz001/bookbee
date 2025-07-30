@@ -6,10 +6,11 @@ import {getHostedTrips} from "../../services/hostService"
 
 const Userbooking = () => {
   const {tripId} = useParams()
-  const [bookingType, setBookingType] = useState("")
+  const [bookingType, setBookingType] = useState("reserveSeat")
   const [trips, setTrips] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [selectedTripDetails, setSelectedTripDetails] = useState(null)
 
   const handleBookingType = event => {
     setBookingType(event.target.value)
@@ -33,11 +34,13 @@ const Userbooking = () => {
   }, [])
 
   useEffect(() => {
-    if (tripId) {
-      // Fetch trip details using tripId
-      // Pre-fill booking form
+    if (tripId && trips.length) {
+      const selectedTrip = trips.find(trip => trip._id === tripId)
+      setSelectedTripDetails(selectedTrip)
+      console.log("Trip by ID:", selectedTrip)
+      // Now you can use selectedTrip to pre-fill form or show details
     }
-  }, [tripId])
+  }, [tripId, trips])
 
   if (loading) return <div className="p-4">Loading trips...</div>
   if (error) return <div className="p-4 text-red-500">Error: {error}</div>
@@ -57,8 +60,8 @@ const Userbooking = () => {
           </select>
         </div>
         <div>
-          {bookingType === "reserveSeat" && <SeatBookingUi />}
-          {bookingType === "reserveCab" && <CabBookingUi />}
+          {bookingType === "reserveSeat" && <SeatBookingUi selectedTripDetails={selectedTripDetails} />}
+          {bookingType === "reserveCab" && <CabBookingUi selectedTripDetails={selectedTripDetails} />}
         </div>
         <button type="submit" className="w-full bg-yellow-400 text-white py-2 rounded hover:bg-yellow-500 transition">
           Submit

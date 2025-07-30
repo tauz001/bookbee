@@ -1,4 +1,8 @@
-const CabBookingUi = () => {
+const CabBookingUi = ({selectedTripDetails}) => {
+  console.log("props data", selectedTripDetails)
+
+  if (!selectedTripDetails) return <p>Loading trip details...</p>
+
   return (
     <div className="flex flex-col gap-4">
       <div>
@@ -6,13 +10,11 @@ const CabBookingUi = () => {
           Choose Pick-Up
         </label>
         <select name="pickUp" id="pickUp" className="w-full border rounded px-3 py-2">
-          <optgroup label="Shahganj">
-            <option value="jci-circle">JCI Circle</option>
-            <option value="bhelara">Bhelara</option>
+          <optgroup label={selectedTripDetails.pickupCity}>
+            <option value={selectedTripDetails.exactPickup}>{selectedTripDetails.exactPickup}</option>
           </optgroup>
-          <optgroup label="Lucknow">
-            <option value="ahmamau">Ahmamau</option>
-            <option value="gomti-nagar">Gomti-nagar</option>
+          <optgroup label={selectedTripDetails.dropCity}>
+            <option value={selectedTripDetails.exactDrop}>{selectedTripDetails.exactDrop}</option>
           </optgroup>
         </select>
       </div>

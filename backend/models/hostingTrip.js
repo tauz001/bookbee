@@ -8,7 +8,7 @@ const tripHostingSchema = mongoose.Schema(
     },
     date: Date,
     exactPickup: {
-      type: String,
+      type: Array,
       required: true,
     },
     dropCity: {
@@ -16,7 +16,7 @@ const tripHostingSchema = mongoose.Schema(
       required: true,
     },
     exactDrop: {
-      type: String,
+      type: Array,
       required: true,
     },
     fare: {

@@ -70,13 +70,29 @@ const HostTripList = () => {
                 <LuArrowRightLeft className="flex-shrink-0 text-gray-500" />
                 <span className="truncate">{trip.dropCity}</span>
               </h3>
-
               {/* Trip Details */}
-              <div className="space-y-2 text-sm text-gray-600">
-                <p className="truncate">Pickup: {trip.exactPickup}</p>
-                <p className="truncate">Drop: {trip.exactDrop}</p>
-                <p>Date: {new Date().toLocaleDateString()}</p> {/* Replace with actual trip date */}
+              <div>
+                <p className="text-sm text-gray-500 mb-1">Pickup Points:</p>
+                <div className="flex flex-wrap gap-2">
+                  {trip.exactPickup.map((point, idx) => (
+                    <span key={idx} className="inline-block bg-yellow-100 text-yellow-800 text-xs font-medium px-3 py-1 rounded-full">
+                      {point}
+                    </span>
+                  ))}
+                </div>
               </div>
+              <div>
+                <p className="text-sm text-gray-500 mt-3 mb-1">Drop Points:</p>
+                <div className="flex flex-wrap gap-2">
+                  {trip.exactDrop.map((point, idx) => (
+                    <span key={idx} className="inline-block bg-blue-100 text-blue-800 text-xs font-medium px-3 py-1 rounded-full">
+                      {point}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <p>Hosted on: {new Date(trip.createdAt).toLocaleDateString()}</p>
+              <p>Last Updated: {new Date(trip.updatedAt).toLocaleDateString()}</p>
 
               {/* Status and Price */}
               <div className="flex items-center justify-between pt-4 border-t border-gray-100">

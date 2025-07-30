@@ -16,9 +16,9 @@ const HostingTrip = () => {
     event.preventDefault() // Prevent default browser POST
 
     const pickupCity = pickupCityRef.current.value
-    const exactPickup = exactPickupRef.current.value
+    const exactPickup = exactPickupRef.current.value.trim().split(/\s+/)
     const dropCity = dropCityRef.current.value
-    const exactDrop = exactDropRef.current.value
+    const exactDrop = exactDropRef.current.value.trim().split(/\s+/)
     const fare = fareRef.current.value
     const date = dateRef.current.value // Get date value
 
