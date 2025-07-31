@@ -75,7 +75,7 @@ const BookingDetails = () => {
               <h4 className="font-semibold text-gray-800 mb-2">Fare Summary</h4>
               <div className="flex justify-between">
                 <span>Base Fare</span>
-                <span>₹1500</span>
+                <span>₹{booking.hostedTripId?.fare || 1500}</span>
               </div>
               <div className="flex justify-between">
                 <span>Tax & Charges</span>
@@ -84,7 +84,7 @@ const BookingDetails = () => {
               <hr />
               <div className="flex justify-between font-semibold text-gray-900 pt-1">
                 <span>Total</span>
-                <span>₹1620</span>
+                <span>₹{booking.hostedTripId?.fare + 120 || 1620}</span>
               </div>
             </div>
           </div>
@@ -107,12 +107,13 @@ const BookingDetails = () => {
           </div>
 
           {/* Vehicle Info - Hardcoded */}
+
           <div className="text-sm text-gray-700">
             <h4 className="font-semibold text-gray-800 mb-1">Vehicle Details</h4>
-            <p>Model: Toyota Innova</p>
-            <p>Number: UP65 AB 1234</p>
-            <p>Type: SUV</p>
-            <p>Seats: 6</p>
+            <p>Model: {booking.hostedTripId?.model || "Toyota Innova"}</p>
+            <p>Number: {booking.hostedTripId?.number || "UP65 AB 1234"}</p>
+            <p>Type: {booking.hostedTripId?.type || "SUV"}</p>
+            <p>Seats: {booking.hostedTripId?.seats || "6"}</p>
           </div>
 
           {/* Passenger Info - Hardcoded */}

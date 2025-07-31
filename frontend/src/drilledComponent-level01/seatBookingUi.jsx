@@ -10,7 +10,6 @@ const SeatBookingUi = ({selectedTripDetails, onFormDataChange}) => {
   const {pickupCity, dropCity, exactPickup, exactDrop} = selectedTripDetails
 
   const updateParent = (pickup, drop, date) => {
-    // Only update if all values are filled
     if (pickup && drop && date) {
       const pickupCityOrigin = exactPickup.includes(pickup) ? pickupCity : dropCity
       const dropCityDestination = exactPickup.includes(drop) ? pickupCity : dropCity
@@ -21,6 +20,7 @@ const SeatBookingUi = ({selectedTripDetails, onFormDataChange}) => {
         dropCity: dropCityDestination,
         exactDrop: drop,
         onDate: date,
+        hostedTripId: selectedTripDetails._id, // Add this
       })
     }
   }

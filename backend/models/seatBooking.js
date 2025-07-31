@@ -6,6 +6,7 @@ const seatBookingSchema = new mongoose.Schema({
   dropCity: {type: String, required: true},
   exactDrop: {type: String, required: true},
   onDate: {type: Date, required: true},
+  hostedTripId: {type: mongoose.Schema.Types.ObjectId, ref: "HostedTrip", required: true}, // Add this
   createdAt: {type: Date, default: Date.now},
 })
 
