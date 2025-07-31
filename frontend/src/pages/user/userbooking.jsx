@@ -1,5 +1,5 @@
 import {useEffect, useState} from "react"
-import {useParams} from "react-router-dom"
+import {useNavigate, useParams} from "react-router-dom"
 import CabBookingUi from "../../drilledComponent-level01/cabBookingUi"
 import SeatBookingUi from "../../drilledComponent-level01/seatBookingUi"
 import {getHostedTrips} from "../../services/hostService"
@@ -12,6 +12,7 @@ const Userbooking = () => {
   const [formData, setFormData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const navigate = useNavigate()
 
   const handleBookingType = event => setBookingType(event.target.value)
 
@@ -24,7 +25,7 @@ const Userbooking = () => {
     try {
       const result = await userBookingOnServer(payload)
       console.log("Booking success:", result)
-      alert("Booking successful!")
+      navigate("/bookings")
     } catch (err) {
       console.error("Submit error:", err)
       alert("Failed to book: " + err.message)

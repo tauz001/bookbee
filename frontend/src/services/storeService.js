@@ -27,3 +27,29 @@ export const userBookingOnServer = async payload => {
     return {} // fallback in case server gives no response JSON
   }
 }
+
+export const getUserCabBooking = async () => {
+  try {
+    const response = await fetch("http://localhost:3000/api/cabbooking")
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+    return await response.json()
+  } catch (error) {
+    console.error("Error fetching trips:", error)
+    throw error
+  }
+}
+
+export const getUserSeatBooking = async () => {
+  try {
+    const response = await fetch("http://localhost:3000/api/seatbooking")
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+    return await response.json()
+  } catch (error) {
+    console.error("Error fetching trips:", error)
+    throw error
+  }
+}

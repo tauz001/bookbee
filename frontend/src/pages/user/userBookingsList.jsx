@@ -1,4 +1,4 @@
-import Booking from "./booking"
+import Booking from "./userBookingUi"
 const UserBookingsList = () => {
   return <Booking />
 }

@@ -16,3 +16,12 @@ exports.createCabBooking = async (req, res) => {
     return res.status(500).json({message: "Server error", error: err.message})
   }
 }
+
+exports.getUserCabBooking = async (req, res) => {
+  try {
+    const bookings = await CabBooking.find()
+    res.status(200).json(bookings)
+  } catch (error) {
+    res.status(500).json({message: error.message})
+  }
+}
