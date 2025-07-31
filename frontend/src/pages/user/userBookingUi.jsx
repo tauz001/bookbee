@@ -41,7 +41,6 @@ const Booking = () => {
   }, [])
 
   const handleDetailsLink = id => {
-    // preventDefault()
     navigate(`/cabbookings/${id}`)
   }
 
@@ -92,11 +91,11 @@ const Booking = () => {
                   <p>
                     Listed by <span className="font-semibold">@user01</span>
                   </p>
-                  <p className="text-yellow-500 font-semibold">★ 4.9</p>
+                  <p className="text-blue-600 font-semibold">₹{booking.hostedTripId?.kmRate || "N/A"}/km</p>
                 </div>
 
-                <div className="text-center text-green-600 font-semibold text-sm mt-3">
-                  Ready for your trip on <span className="underline">{new Date(booking.dateTime).toLocaleDateString()}</span>
+                <div className="text-center text-blue-600 font-semibold text-sm mt-3 bg-blue-50 rounded p-2">
+                  <span>Reserved Cab • Rate: ₹{booking.hostedTripId?.fare || "N/A"}/km</span>
                 </div>
               </div>
             </div>
@@ -108,7 +107,6 @@ const Booking = () => {
       <div>
         <h2 className="text-2xl font-bold text-gray-800 mb-6">Shared Bookings</h2>
         <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-          {/* Hardcoded seat booking example */}
           {seatBookings.map((booking, index) => (
             <div key={index} className="max-w-md w-full mx-auto bg-white rounded-xl border border-green-200 shadow-md hover:shadow-lg transition overflow-hidden">
               <div className="h-48 bg-green-50">
@@ -147,11 +145,11 @@ const Booking = () => {
                   <p>
                     Listed by <span className="font-semibold">@user12</span>
                   </p>
-                  <p className="text-yellow-500 font-semibold">★ 4.7</p>
+                  <p className="text-green-600 font-semibold">₹{booking.hostedTripId?.seatFare || "N/A"}</p>
                 </div>
 
-                <div className="text-center text-green-700 font-semibold text-sm mt-3">
-                  Ready for your trip on <span className="underline">{new Date(booking.onDate).toLocaleDateString()}</span>
+                <div className="text-center text-green-700 font-semibold text-sm mt-3 bg-green-50 rounded p-2">
+                  <span>Shared Seat • Fixed Fare: ₹{booking.hostedTripId?.fare || "N/A"}</span>
                 </div>
               </div>
             </div>

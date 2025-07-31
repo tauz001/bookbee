@@ -66,7 +66,9 @@ const TripsList = () => {
               <div className="flex items-center justify-between pt-4 border-t border-gray-100">
                 <div>
                   <p className="text-sm text-gray-500">Price per seat</p>
-                  <p className="font-bold text-xl text-yellow-600">₹{trip.fare}</p>
+                  <p className="font-bold text-xl text-yellow-600">₹{trip.seatFare}</p>
+                  <p className="text-sm text-gray-500">Rate per KM</p>
+                  <p className="font-bold text-xl text-yellow-600">₹{trip.kmRate}</p>
                 </div>
                 <button
                   className="bg-yellow-400 text-white font-bold hover:text-black hover:font-bold px-4 py-2 rounded-lg 

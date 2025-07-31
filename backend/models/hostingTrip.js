@@ -19,7 +19,11 @@ const tripHostingSchema = mongoose.Schema(
       type: Array,
       required: true,
     },
-    fare: {
+    seatFare: {  // For seat bookings
+      type: Number,
+      required: true,
+    },
+    kmRate: {    // For cab bookings
       type: Number,
       required: true,
     },

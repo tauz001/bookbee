@@ -36,6 +36,10 @@ const BookingDetails = () => {
     }
   }, [id])
 
+  const isCabBooking = booking => {
+    return !booking.dropCity // Cab bookings don't have dropCity
+  }
+
   if (loading) return <div className="container mx-auto p-4">Loading booking details...</div>
   if (error) return <div className="container mx-auto p-4 text-red-500">Error: {error}</div>
   if (!booking) return <div className="container mx-auto p-4">No booking found</div>
@@ -66,26 +70,46 @@ const BookingDetails = () => {
                 <span className="font-semibold">Booked On:</span> {booking.createdAt ? new Date(booking.createdAt).toLocaleDateString() : "2025-07-20"}
               </p>
               <p>
-                <span className="font-semibold">Reservation Type:</span> <span className="text-gray-800">{booking.dropCity ? "Seat Booking" : "Cab Booking"}</span>
+                <span className="font-semibold">Reservation Type:</span>
+                <span className="text-gray-800">{isCabBooking(booking) ? <span>₹{booking.hostedTripId?.kmRate || "N/A"}</span> : <span>₹{booking.hostedTripId?.seatFare || "N/A"}</span>}</span>
               </p>
             </div>
 
             {/* Fare Summary - Hardcoded */}
             <div className="bg-blue-50 rounded-lg p-4 mt-4 text-sm text-gray-700 space-y-1">
-              <h4 className="font-semibold text-gray-800 mb-2">Fare Summary</h4>
-              <div className="flex justify-between">
-                <span>Base Fare</span>
-                <span>₹{booking.hostedTripId?.fare || 1500}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Tax & Charges</span>
-                <span>₹120</span>
-              </div>
-              <hr />
-              <div className="flex justify-between font-semibold text-gray-900 pt-1">
-                <span>Total</span>
-                <span>₹{booking.hostedTripId?.fare + 120 || 1620}</span>
-              </div>
+              <h4 className="font-semibold text-gray-800 mb-2">Fare Information</h4>
+
+              {isCabBooking(booking) ? (
+                // Cab booking fare display
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span>Rate per KM</span>
+                    <span>₹{booking.hostedTripId?.fare || "N/A"}</span>
+                  </div>
+                  <div className="bg-yellow-50 border border-yellow-200 rounded p-2 mt-2">
+                    <p className="text-yellow-800 text-xs">
+                      <strong>Note:</strong> Final fare will be calculated based on actual distance traveled at ₹{booking.hostedTripId?.fare || "N/A"} per km + applicable taxes.
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                // Seat booking fare display
+                <div className="space-y-1">
+                  <div className="flex justify-between">
+                    <span>Seat Fare</span>
+                    <span>₹{booking.hostedTripId?.seatFare || 1500}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Tax & Charges</span>
+                    <span>₹120</span>
+                  </div>
+                  <hr />
+                  <div className="flex justify-between font-semibold text-gray-900 pt-1">
+                    <span>Total</span>
+                    <span>₹{booking.hostedTripId?.seatFare + 120 || 1620}</span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -101,8 +125,8 @@ const BookingDetails = () => {
             </div>
             <div>
               <h4 className="font-semibold text-gray-800 mb-1">Drop Location</h4>
-              <p>{booking.exactDrop || "Charbagh Railway Station"}</p>
-              <p className="text-xs text-gray-500">City: {booking.dropCity || "Lucknow"}</p>
+              <p>{booking.exactDrop || "N/A"}</p>
+              <p className="text-xs text-gray-500">City: {booking.dropCity || "N/A"}</p>
             </div>
           </div>
 

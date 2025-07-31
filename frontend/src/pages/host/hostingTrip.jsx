@@ -1,87 +1,3 @@
-// import {useOutletContext, useNavigate} from "react-router-dom"
-// import {useRef} from "react"
-
-// const HostingTrip = () => {
-//   const {handleNewTripHostings} = useOutletContext()
-//   const navigate = useNavigate()
-
-//   const pickupCityRef = useRef()
-//   const exactPickupRef = useRef()
-//   const dropCityRef = useRef()
-//   const exactDropRef = useRef()
-//   const fareRef = useRef()
-//   const dateRef = useRef() // Add ref for date
-
-//   const handleFormSubmissionValues = event => {
-//     event.preventDefault() // Prevent default browser POST
-
-//     const pickupCity = pickupCityRef.current.value
-//     const exactPickup = exactPickupRef.current.value.trim().split(/\s+/)
-//     const dropCity = dropCityRef.current.value
-//     const exactDrop = exactDropRef.current.value.trim().split(/\s+/)
-//     const fare = fareRef.current.value
-//     const date = dateRef.current.value // Get date value
-
-//     // Call parent handler to send data to backend
-//     handleNewTripHostings(pickupCity, exactPickup, exactDrop, dropCity, fare)
-
-//     navigate("/host/trips")
-//   }
-
-//   return (
-//     <form onSubmit={handleFormSubmissionValues} className="max-w-md mx-auto bg-white rounded-xl shadow-lg p-6">
-//       <h2 className="text-2xl font-bold mb-6">Host a New Trip</h2>
-//       <div>
-//         <label htmlFor="pickup-city" className="block text-sm font-medium mb-1">
-//           Pick-Up City
-//         </label>
-//         <select name="pickup-city" id="pickup-city" className="w-full border rounded px-3 py-2" ref={pickupCityRef}>
-//           <option value="shahganj">Shahganj</option>
-//           <option value="lucknow">Lucknow</option>
-//         </select>
-//       </div>
-//       <div>
-//         <label htmlFor="exact-pickup" className="block text-sm font-medium mb-1">
-//           Exact Pick-Up Location
-//         </label>
-//         <input type="text" name="exact-pickup" id="exact-pickup" placeholder="Enter exact pickup within selected city" className="w-full border rounded px-3 py-2" ref={exactPickupRef} />
-//       </div>
-//       <div>
-//         <label htmlFor="drop-city" className="block text-sm font-medium mb-1">
-//           Drop City
-//         </label>
-//         <select name="drop-city" id="drop-city" className="w-full border rounded px-3 py-2" ref={dropCityRef}>
-//           <option value="shahganj">Shahganj</option>
-//           <option value="lucknow">Lucknow</option>
-//         </select>
-//       </div>
-//       <div>
-//         <label htmlFor="exact-drop" className="block text-sm font-medium mb-1">
-//           Exact Drop Location
-//         </label>
-//         <input type="text" name="exact-drop" id="exact-drop" placeholder="Enter exact drop within selected city" className="w-full border rounded px-3 py-2" ref={exactDropRef} />
-//       </div>
-//       <div>
-//         <label htmlFor="fare" className="block text-sm font-medium mb-1">
-//           Fare Per Seat (One Way)
-//         </label>
-//         <input type="text" name="fare" id="fare" placeholder="Enter fare per seat for one way" className="w-full border rounded px-3 py-2" ref={fareRef} />
-//       </div>
-//       <div>
-//         <label htmlFor="date" className="block text-sm font-medium mb-1">
-//           Date
-//         </label>
-//         <input type="date" name="date" id="date" className="w-full border rounded px-3 py-2" ref={dateRef} />
-//       </div>
-//       <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition">
-//         Host Your Trip
-//       </button>
-//     </form>
-//   )
-// }
-
-// export default HostingTrip
-
 import {useOutletContext, useNavigate} from "react-router-dom"
 import {useRef} from "react"
 
@@ -99,6 +15,8 @@ const HostingTrip = () => {
   const numberRef = useRef()
   const typeRef = useRef()
   const seatsRef = useRef()
+  const seatFareRef = useRef()
+  const kmRateRef = useRef()
 
   // ✅ Centralized Form Data Config
   const formData = {
@@ -111,7 +29,8 @@ const HostingTrip = () => {
       exactPickup: "Exact Pick-Up Location",
       dropCity: "Drop City",
       exactDrop: "Exact Drop Location",
-      fare: "Fare Per Seat (One Way)",
+      seatFare: "Fare Per Seat (Shared Rides)", // New
+      kmRate: "Rate Per KM (Cab Bookings)", // New
       date: "Trip Date",
       model: "Vehicle Model",
       number: "Vehicle Number",
@@ -121,7 +40,8 @@ const HostingTrip = () => {
     placeholders: {
       exactPickup: "Enter pickup",
       exactDrop: "Enter drop",
-      fare: "e.g., 500",
+      seatFare: "e.g., 500", // New
+      kmRate: "e.g., 15", // New
       number: "e.g., UP65 AB 1234",
     },
   }
@@ -133,14 +53,15 @@ const HostingTrip = () => {
     const exactPickup = exactPickupRef.current.value.trim().split(/\s+/)
     const dropCity = dropCityRef.current.value
     const exactDrop = exactDropRef.current.value.trim().split(/\s+/)
-    const fare = fareRef.current.value
+    const seatFare = seatFareRef.current.value // New
+    const kmRate = kmRateRef.current.value // New
     const date = dateRef.current.value
     const model = modelRef.current.value
     const number = numberRef.current.value
     const type = typeRef.current.value
     const seats = seatsRef.current.value
 
-    handleNewTripHostings(pickupCity, exactPickup, exactDrop, dropCity, fare, date, model, number, type, seats)
+    handleNewTripHostings(pickupCity, exactPickup, exactDrop, dropCity, seatFare, kmRate, date, model, number, type, seats)
 
     navigate("/host/trips")
   }
@@ -187,9 +108,16 @@ const HostingTrip = () => {
         </div>
 
         {/* Fare */}
+        {/* Seat Fare */}
         <div>
-          <label className="block text-sm font-medium mb-1">{formData.labels.fare}</label>
-          <input type="text" ref={fareRef} placeholder={formData.placeholders.fare} className="w-full border rounded px-3 py-2" />
+          <label className="block text-sm font-medium mb-1">{formData.labels.seatFare}</label>
+          <input type="text" ref={seatFareRef} placeholder={formData.placeholders.seatFare} className="w-full border rounded px-3 py-2" />
+        </div>
+
+        {/* KM Rate */}
+        <div>
+          <label className="block text-sm font-medium mb-1">{formData.labels.kmRate}</label>
+          <input type="text" ref={kmRateRef} placeholder={formData.placeholders.kmRate} className="w-full border rounded px-3 py-2" />
         </div>
 
         {/* Date */}

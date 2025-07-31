@@ -1,11 +1,11 @@
-export const hostTripToServer = async (pickupCity, exactPickup, exactDrop, dropCity, fare, date, model, number, type, seats) => {
+export const hostTripToServer = async (pickupCity, exactPickup, exactDrop, dropCity, seatFare, kmRate, date, model, number, type, seats) => {
   try {
     const response = await fetch("http://localhost:3000/api/hostingTrip", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({pickupCity, exactPickup, exactDrop, dropCity, fare, date, model, number, type, seats}),
+      body: JSON.stringify({pickupCity, exactPickup, exactDrop, dropCity, seatFare, kmRate, date, model, number, type, seats}),
     })
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`)

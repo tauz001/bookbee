@@ -98,7 +98,9 @@ const HostTripList = () => {
               <div className="flex items-center justify-between pt-4 border-t border-gray-100">
                 <div>
                   <p className="text-sm text-gray-500">Price per seat</p>
-                  <p className="font-bold text-xl text-blue-600">₹{trip.fare}</p>
+                  <p className="font-bold text-xl text-blue-600">₹{trip.seatFare}</p>
+                  <p className="text-sm text-gray-500">Rate per KM</p>
+                  <p className="font-bold text-xl text-blue-600">₹{trip.kmRate}</p>
                 </div>
                 <span className="bg-green-100 text-green-800 text-sm px-3 py-1 rounded-full">Active</span>
               </div>

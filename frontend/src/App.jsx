@@ -7,9 +7,9 @@ import Navbar from "./components/navbar"
 function App() {
   const [hostedTrips, setHostedTrip] = useState([])
 
-  const handleNewTripHostings = async (pickupCity, exactPickup, exactDrop, dropCity, fare, date, model, number, type, seats) => {
+  const handleNewTripHostings = async (pickupCity, exactPickup, exactDrop, dropCity, seatFare, kmRate, date, model, number, type, seats) => {
     try {
-      const item = await hostTripToServer(pickupCity, exactPickup, exactDrop, dropCity, fare, date, model, number, type, seats)
+      const item = await hostTripToServer(pickupCity, exactPickup, exactDrop, dropCity, seatFare, kmRate, date, model, number, type, seats)
       setHostedTrip([...hostedTrips, item])
     } catch (error) {
       console.error("Error hosting trip:", error)
