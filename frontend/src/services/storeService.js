@@ -1,5 +1,7 @@
 export const userBookingOnServer = async payload => {
-  const res = await fetch("http://localhost:3000/api/booking", {
+  const path = payload.bookingType === "reserveSeat" ? "seatbooking" : "cabbooking"
+
+  const res = await fetch(`http://localhost:3000/api/${path}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -8,9 +10,20 @@ export const userBookingOnServer = async payload => {
   })
 
   if (!res.ok) {
-    const err = await res.json()
-    throw new Error(err.message || "Booking failed")
+    let errorMessage = "Booking failed"
+    try {
+      const err = await res.json()
+      errorMessage = err.message || errorMessage
+    } catch {
+      const fallback = await res.text()
+      errorMessage = fallback || errorMessage
+    }
+    throw new Error(errorMessage)
   }
 
-  return await res.json()
+  try {
+    return await res.json()
+  } catch {
+    return {} // fallback in case server gives no response JSON
+  }
 }

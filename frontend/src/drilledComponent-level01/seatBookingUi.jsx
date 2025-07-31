@@ -10,16 +10,19 @@ const SeatBookingUi = ({selectedTripDetails, onFormDataChange}) => {
   const {pickupCity, dropCity, exactPickup, exactDrop} = selectedTripDetails
 
   const updateParent = (pickup, drop, date) => {
-    const pickupCityOrigin = exactPickup.includes(pickup) ? pickupCity : dropCity
-    const dropCityDestination = exactPickup.includes(drop) ? pickupCity : dropCity
+    // Only update if all values are filled
+    if (pickup && drop && date) {
+      const pickupCityOrigin = exactPickup.includes(pickup) ? pickupCity : dropCity
+      const dropCityDestination = exactPickup.includes(drop) ? pickupCity : dropCity
 
-    onFormDataChange({
-      pickupCity: pickupCityOrigin,
-      exactPickup: pickup,
-      dropCity: dropCityDestination,
-      exactDrop: drop,
-      ondate: date,
-    })
+      onFormDataChange({
+        pickupCity: pickupCityOrigin,
+        exactPickup: pickup,
+        dropCity: dropCityDestination,
+        exactDrop: drop,
+        onDate: date,
+      })
+    }
   }
 
   const handlePickup = e => {
@@ -50,7 +53,7 @@ const SeatBookingUi = ({selectedTripDetails, onFormDataChange}) => {
         <label htmlFor="pickup" className="block text-sm font-medium mb-1">
           Choose Pick-Up
         </label>
-        <select id="pickup" onChange={handlePickup} className="w-full border rounded px-3 py-2">
+        <select id="pickup" value={selectedPickup} onChange={handlePickup} className="w-full border rounded px-3 py-2">
           <option value="">-- Select Pick-Up --</option>
           <optgroup label={pickupCity}>
             {exactPickup.map((point, idx) => (
@@ -74,26 +77,20 @@ const SeatBookingUi = ({selectedTripDetails, onFormDataChange}) => {
         <label htmlFor="drop" className="block text-sm font-medium mb-1">
           Choose Drop
         </label>
-        <select id="drop" onChange={handleDrop} className="w-full border rounded px-3 py-2">
+        <select id="drop" value={selectedDrop} onChange={handleDrop} disabled={!selectedPickup} className="w-full border rounded px-3 py-2 disabled:bg-gray-100">
           <option value="">-- Select Drop --</option>
-          {isPickupFromPickupCity && (
-            <optgroup label={dropCity}>
-              {exactDrop.map((point, idx) => (
-                <option key={idx} value={point}>
-                  {point}
-                </option>
-              ))}
-            </optgroup>
-          )}
-          {isPickupFromDropCity && (
-            <optgroup label={pickupCity}>
-              {exactPickup.map((point, idx) => (
-                <option key={idx} value={point}>
-                  {point}
-                </option>
-              ))}
-            </optgroup>
-          )}
+          {isPickupFromPickupCity &&
+            exactDrop.map((point, idx) => (
+              <option key={idx} value={point}>
+                {point}
+              </option>
+            ))}
+          {isPickupFromDropCity &&
+            exactPickup.map((point, idx) => (
+              <option key={idx} value={point}>
+                {point}
+              </option>
+            ))}
         </select>
       </div>
 

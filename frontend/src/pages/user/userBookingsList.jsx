@@ -1,9 +1,6 @@
-import Booking from './booking'
+import Booking from "./booking"
 const UserBookingsList = () => {
-  
-  return (
-    <Booking/>
-  )
+  return <Booking />
 }
 
 export default UserBookingsList

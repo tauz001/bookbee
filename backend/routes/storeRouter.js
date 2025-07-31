@@ -1,6 +1,10 @@
 const express = require("express")
+const router = express.Router()
 
-const storeRouter = express()
-const storeController = require("../controllers/storeController")
+const {createSeatBooking} = require("../controllers/seatBookingController")
+const {createCabBooking} = require("../controllers/cabBookingController")
 
-storeRouter.post("/", storeController.createUserSeatBooking)
+router.post("/seatbooking", createSeatBooking)
+router.post("/cabbooking", createCabBooking)
+
+module.exports = router

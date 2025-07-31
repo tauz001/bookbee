@@ -22,12 +22,8 @@ app.use(
 
 app.use(express.urlencoded())
 app.use(express.json())
-// app.use((req, res, next) => {
-//   console.log(req)
-//   next()
-// })
 app.use("/api/hostingTrip", hostRouter)
-app.use("/api/booking", storeRouter)
+app.use("/api", storeRouter)
 
 const PORT = 3000
 const DB_PATH = "mongodb+srv://root:tauz001@bookbee.4xj0vww.mongodb.net/?retryWrites=true&w=majority&appName=BookBee"

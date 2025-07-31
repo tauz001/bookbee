@@ -29,3 +29,5 @@ function App() {
 }
 
 export default App
+
+// some changes and mostly mess --will have to clean code and fix tons of wirings and bugs
