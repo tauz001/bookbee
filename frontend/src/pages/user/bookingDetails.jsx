@@ -13,16 +13,13 @@ const BookingDetails = () => {
     const fetchBookingData = async () => {
       try {
         setLoading(true)
-        
-        // Try to fetch from both databases
-        const [cabResponse, seatResponse] = await Promise.allSettled([
-          getCabBookingById(id),
-          getSeatBookingById(id)
-        ])
 
-        if (cabResponse.status === 'fulfilled') {
+        // Try to fetch from both databases
+        const [cabResponse, seatResponse] = await Promise.allSettled([getCabBookingById(id), getSeatBookingById(id)])
+
+        if (cabResponse.status === "fulfilled") {
           setBooking(cabResponse.value)
-        } else if (seatResponse.status === 'fulfilled') {
+        } else if (seatResponse.status === "fulfilled") {
           setBooking(seatResponse.value)
         } else {
           setError("Booking not found")
@@ -63,25 +60,13 @@ const BookingDetails = () => {
 
             <div className="space-y-1 text-sm text-gray-600">
               <p>
-                <span className="font-semibold">Trip Date:</span> {
-                  booking.dateTime 
-                    ? new Date(booking.dateTime).toLocaleDateString()
-                    : booking.onDate 
-                    ? new Date(booking.onDate).toLocaleDateString()
-                    : "2025-08-10"
-                }
+                <span className="font-semibold">Trip Date:</span> {booking.dateTime ? new Date(booking.dateTime).toLocaleDateString() : booking.onDate ? new Date(booking.onDate).toLocaleDateString() : "2025-08-10"}
               </p>
               <p>
-                <span className="font-semibold">Booked On:</span> {
-                  booking.createdAt 
-                    ? new Date(booking.createdAt).toLocaleDateString()
-                    : "2025-07-20"
-                }
+                <span className="font-semibold">Booked On:</span> {booking.createdAt ? new Date(booking.createdAt).toLocaleDateString() : "2025-07-20"}
               </p>
               <p>
-                <span className="font-semibold">Reservation Type:</span> <span className="text-gray-800">
-                  {booking.dropCity ? "Seat Booking" : "Cab Booking"}
-                </span>
+                <span className="font-semibold">Reservation Type:</span> <span className="text-gray-800">{booking.dropCity ? "Seat Booking" : "Cab Booking"}</span>
               </p>
             </div>
 
