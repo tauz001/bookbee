@@ -1,12 +1,14 @@
 import {useEffect, useState} from "react"
 import vehicleImg from "../../assets/vehicleImg01.jpg"
 import {getUserCabBooking, getUserSeatBooking} from "../../services/storeService"
+import {useNavigate} from "react-router-dom"
 
 const Booking = () => {
   const [cabBookings, setCabBookings] = useState([])
   const [seatBookings, setSeatBookings] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const navigate = useNavigate()
 
   useEffect(() => {
     const fetchTrips = async () => {
@@ -37,6 +39,11 @@ const Booking = () => {
 
     fetchTrips()
   }, [])
+
+  const handleDetailsLink = id => {
+    // preventDefault()
+    navigate(`/cabbookings/${id}`)
+  }
 
   if (loading) return <div className="container mx-auto p-4">Loading bookings...</div>
   if (error) return <div className="container mx-auto p-4 text-red-500">Error: {error}</div>
@@ -77,7 +84,7 @@ const Booking = () => {
                   </div>
                 </div>
 
-                <a href="#" className="text-blue-600 font-medium hover:underline">
+                <a className="text-blue-600 font-medium hover:underline cursor-pointer" onClick={() => handleDetailsLink(booking._id)}>
                   View booking details
                 </a>
 
@@ -132,7 +139,7 @@ const Booking = () => {
                   </div>
                 </div>
 
-                <a href="#" className="text-green-600 font-medium hover:underline">
+                <a className="text-blue-600 font-medium hover:underline cursor-pointer" onClick={() => handleDetailsLink(booking._id)}>
                   View booking details
                 </a>
 

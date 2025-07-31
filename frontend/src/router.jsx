@@ -7,6 +7,7 @@ import HostingTrip from "./pages/host/hostingTrip"
 import HostTripList from "./pages/host/hostTripList"
 import EditTrip from "./pages/host/editTrip"
 import Homepage from "./pages/common/homePage"
+import BookingDetails from "./pages/user/bookingDetails"
 
 export const router = createBrowserRouter([
   {
@@ -32,6 +33,10 @@ export const router = createBrowserRouter([
       {
         path: "book/:tripId/",
         element: <Userbooking />,
+      },
+      {
+        path: "/cabbookings/:id",
+        element: <BookingDetails />,
       },
       {
         path: "host",
