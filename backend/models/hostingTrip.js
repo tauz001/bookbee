@@ -23,6 +23,26 @@ const tripHostingSchema = mongoose.Schema(
       type: Number,
       required: true,
     },
+    date: {
+      type: String,
+      required: true,
+    },
+    model: {
+      type: String,
+      required: true,
+    },
+    number: {
+      type: String,
+      required: true,
+    },
+    type: {
+      type: String,
+      required: true,
+    },
+    seats: {
+      type: Number,
+      required: true,
+    },
   },
   {timestamps: true}
 )
