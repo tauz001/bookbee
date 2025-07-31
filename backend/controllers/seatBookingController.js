@@ -25,3 +25,19 @@ exports.getUserSeatBooking = async (req, res) => {
     res.status(500).json({message: error.message})
   }
 }
+
+
+exports.getSeatBookingById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const booking = await SeatBooking.findById(id);
+    
+    if (!booking) {
+      return res.status(404).json({ message: "Seat booking not found" });
+    }
+    
+    res.status(200).json(booking);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
