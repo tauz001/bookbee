@@ -1,13 +1,58 @@
-const mongoose = require("mongoose")
+const mongoose = require("mongoose");
 
+/**
+ * Seat booking schema for shared rides
+ */
 const seatBookingSchema = new mongoose.Schema({
-  pickupCity: {type: String, required: true},
-  exactPickup: {type: String, required: true},
-  dropCity: {type: String, required: true},
-  exactDrop: {type: String, required: true},
-  onDate: {type: Date, required: true},
-  hostedTripId: {type: mongoose.Schema.Types.ObjectId, ref: "HostedTrip", required: true}, // Add this
-  createdAt: {type: Date, default: Date.now},
-})
+  // Route Information
+  pickupCity: {
+    type: String,
+    required: [true, "Pickup city is required"],
+    trim: true,
+    lowercase: true
+  },
+  exactPickup: {
+    type: String,
+    required: [true, "Exact pickup location is required"],
+    trim: true
+  },
+  dropCity: {
+    type: String,
+    required: [true, "Drop city is required"],
+    trim: true,
+    lowercase: true
+  },
+  exactDrop: {
+    type: String,
+    required: [true, "Exact drop location is required"],
+    trim: true
+  },
+  
+  // Booking Details
+  tripDate: {
+    type: Date,
+    required: [true, "Trip date is required"]
+  },
+  
+  // Reference to hosted trip
+  tripId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Trip",
+    required: [true, "Trip reference is required"]
+  },
+  
+  // Booking Status
+  status: {
+    type: String,
+    enum: ["confirmed", "cancelled", "completed"],
+    default: "confirmed"
+  }
+}, {
+  timestamps: true
+});
 
-module.exports = mongoose.model("SeatBooking", seatBookingSchema)
+// Indexes
+seatBookingSchema.index({ tripId: 1 });
+seatBookingSchema.index({ status: 1 });
+
+module.exports = mongoose.model("SeatBooking", seatBookingSchema);

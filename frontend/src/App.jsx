@@ -1,33 +1,49 @@
-import {useState} from "react"
-import {Link, Outlet} from "react-router-dom"
-import "./App.css"
-import {hostTripToServer} from "./services/hostService"
-import Navbar from "./components/navbar"
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Navbar from './components/layout/Navbar';
+import HomePage from './pages/HomePage';
+import TripsListPage from './pages/trips/TripsListPage';
+import BookingsListPage from './pages/bookings/BookingsListPage';
+import CreateTripPage from './pages/host/CreateTripPage';
+import HostTripsListPage from './pages/host/HostTripsListPage';
+import { APP_ROUTES } from './config/constants';
+import BookingFormPage from './pages/bookings/BookingsFormPage';
 
 function App() {
-  const [hostedTrips, setHostedTrip] = useState([])
-
-  const handleNewTripHostings = async (pickupCity, exactPickup, exactDrop, dropCity, seatFare, kmRate, date, model, number, type, seats) => {
-    try {
-      const item = await hostTripToServer(pickupCity, exactPickup, exactDrop, dropCity, seatFare, kmRate, date, model, number, type, seats)
-      setHostedTrip([...hostedTrips, item])
-    } catch (error) {
-      console.error("Error hosting trip:", error)
-    }
-  }
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Navigation */}
-      <Navbar />
-      {/* Main Content */}
-      <main className="container mx-auto py-8">
-        <Outlet context={{handleNewTripHostings}} />
-      </main>
-    </div>
-  )
+    <Router>
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <main>
+          <Routes>
+            <Route path={APP_ROUTES.HOME} element={<HomePage />} />
+            <Route path={APP_ROUTES.TRIPS} element={<TripsListPage />} />
+            <Route path={APP_ROUTES.BOOKINGS} element={<BookingsListPage />} />
+            <Route path="/book/:tripId" element={<BookingFormPage />} />
+            <Route path={APP_ROUTES.HOST_NEW} element={<CreateTripPage />} />
+            <Route path={APP_ROUTES.HOST_TRIPS} element={<HostTripsListPage />} />
+            <Route path="*" element={<NotFoundPage />} />
+          </Routes>
+        </main>
+      </div>
+    </Router>
+  );
 }
 
-export default App
+// 404 Page Component
+const NotFoundPage = () => (
+  <div className="container mx-auto px-4 py-16 text-center">
+    <div className="max-w-md mx-auto">
+      <h1 className="text-4xl font-bold text-gray-900 mb-4">404</h1>
+      <p className="text-gray-600 mb-6">The page you're looking for doesn't exist.</p>
+      <a 
+        href="/" 
+        className="inline-block bg-yellow-400 text-white px-6 py-3 rounded-lg hover:bg-yellow-500 transition-colors"
+      >
+        Go Home
+      </a>
+    </div>
+  </div>
+);
 
-// some changes and mostly mess --will have to clean code and fix tons of wirings and bugs
+export default App;

@@ -1,41 +1,61 @@
-// Core Module
+// Core modules
+const express = require("express");
+const cors = require("cors");
 
-// External Module
-const express = require("express")
-const cors = require("cors")
+// Local modules
+const connectDatabase = require("./config/database");
+const errorHandler = require("./middleware/errorHandler");
+const tripRoutes = require("./routes/tripRoutes");
+const bookingRoutes = require("./routes/bookingRoutes");
+const { PORT, CORS_ORIGIN } = require("./config/constants");
 
-//Local Module
-const hostRouter = require("./routes/hostRouter")
-const storeRouter = require("./routes/storeRouter")
+/**
+ * Express application setup
+ */
+const app = express();
 
-const {default: mongoose} = require("mongoose")
-const app = express()
+// Database connection
+connectDatabase();
 
-// Configure CORS with specific options
-app.use(
-  cors({
-    origin: "http://localhost:5173", // Your frontend Vite default port
-    methods: ["GET", "POST"],
-    allowedHeaders: ["Content-Type"],
-  })
-)
+// Middleware
+app.use(cors({
+  origin: CORS_ORIGIN,
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+}));
 
-app.use(express.urlencoded())
-app.use(express.json())
-app.use("/api/hostingTrip", hostRouter)
-app.use("/api", storeRouter)
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
-const PORT = 3000
-const DB_PATH = "mongodb+srv://root:tauz001@bookbee.4xj0vww.mongodb.net/?retryWrites=true&w=majority&appName=BookBee"
+// Health check route
+app.get("/api/health", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "BookBee API is running",
+    timestamp: new Date().toISOString()
+  });
+});
 
-mongoose
-  .connect(DB_PATH)
-  .then(() => {
-    console.log("Connected to Mongo")
-    app.listen(PORT, () => {
-      console.log(`Server running on address http://localhost:${PORT}`)
-    })
-  })
-  .catch(err => {
-    console.log("Error while connecting to Mongo: ", err)
-  })
+// API Routes
+app.use("/api/trips", tripRoutes);
+app.use("/api/bookings", bookingRoutes);
+
+// 404 handler
+app.use("*", (req, res) => {
+  res.status(404).json({
+    success: false,
+    message: "Route not found",
+    path: req.originalUrl
+  });
+});
+
+// Error handling middleware (must be last)
+app.use(errorHandler);
+
+// Start server
+app.listen(PORT, () => {
+  console.log(`🚀 BookBee server running on http://localhost:${PORT}`);
+  console.log(`📊 Health check: http://localhost:${PORT}/api/health`);
+});
+
+module.exports = app;

@@ -1,42 +1,109 @@
-const CabBooking = require("../models/CabBooking")
+const CabBooking = require("../models/CabBooking");
+const Trip = require("../models/Trip");
+const { sendSuccess, sendCreated, sendNotFound, sendBadRequest, sendServerError } = require("../utils/responseHelper");
 
-exports.createCabBooking = async (req, res) => {
-  try {
-    const {pickupCity, exactPickup, dateTime, hostedTripId} = req.body
+/**
+ * CabBooking Controller - Handles cab booking operations
+ */
+class CabBookingController {
+  
+  /**
+   * Create a new cab booking
+   */
+  static async createCabBooking(req, res, next) {
+    try {
+      const { pickupCity, exactPickup, dateTime, hostedTripId } = req.body;
 
-    if (!pickupCity || !exactPickup || !dateTime || !hostedTripId) {
-      return res.status(400).json({message: "Incomplete cab booking data"})
+      // Validate required fields
+      if (!pickupCity || !exactPickup || !dateTime || !hostedTripId) {
+        return sendBadRequest(res, "All booking fields are required");
+      }
+
+      // Verify trip exists and is active
+      const trip = await Trip.findOne({ _id: hostedTripId, isActive: true });
+      if (!trip) {
+        return sendNotFound(res, "Trip not found or inactive");
+      }
+
+      // Create booking
+      const booking = new CabBooking({
+        pickupCity,
+        exactPickup,
+        dateTime: new Date(dateTime),
+        tripId: hostedTripId
+      });
+
+      const savedBooking = await booking.save();
+      await savedBooking.populate('tripId');
+
+      sendCreated(res, savedBooking, "Cab booking created successfully");
+
+    } catch (error) {
+      next(error);
     }
-
-    const cabBooking = new CabBooking({pickupCity, exactPickup, dateTime, hostedTripId})
-    await cabBooking.save()
-
-    return res.status(201).json({message: "Cab booking successful", booking: cabBooking})
-  } catch (err) {
-    return res.status(500).json({message: "Server error", error: err.message})
   }
-}
 
-exports.getUserCabBooking = async (req, res) => {
-  try {
-    const bookings = await CabBooking.find().populate("hostedTripId")
-    res.status(200).json(bookings)
-  } catch (error) {
-    res.status(500).json({message: error.message})
-  }
-}
+  /**
+   * Get all cab bookings
+   */
+  static async getAllCabBookings(req, res, next) {
+    try {
+      const bookings = await CabBooking.find()
+        .populate('tripId')
+        .sort({ createdAt: -1 });
 
-exports.getCabBookingById = async (req, res) => {
-  try {
-    const {id} = req.params
-    const booking = await CabBooking.findById(id).populate("hostedTripId")
-
-    if (!booking) {
-      return res.status(404).json({message: "Cab booking not found"})
+      sendSuccess(res, bookings, "Cab bookings retrieved successfully");
+    } catch (error) {
+      next(error);
     }
+  }
 
-    res.status(200).json(booking)
-  } catch (error) {
-    res.status(500).json({message: error.message})
+  /**
+   * Get cab booking by ID
+   */
+  static async getCabBookingById(req, res, next) {
+    try {
+      const { id } = req.params;
+      
+      const booking = await CabBooking.findById(id).populate('tripId');
+      
+      if (!booking) {
+        return sendNotFound(res, "Cab booking not found");
+      }
+
+      sendSuccess(res, booking, "Cab booking retrieved successfully");
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Update cab booking status
+   */
+  static async updateCabBooking(req, res, next) {
+    try {
+      const { id } = req.params;
+      const { status } = req.body;
+
+      if (!["confirmed", "cancelled", "completed"].includes(status)) {
+        return sendBadRequest(res, "Invalid status value");
+      }
+
+      const booking = await CabBooking.findByIdAndUpdate(
+        id,
+        { status },
+        { new: true, runValidators: true }
+      ).populate('tripId');
+
+      if (!booking) {
+        return sendNotFound(res, "Cab booking not found");
+      }
+
+      sendSuccess(res, booking, "Cab booking updated successfully");
+    } catch (error) {
+      next(error);
+    }
   }
 }
+
+module.exports = CabBookingController;

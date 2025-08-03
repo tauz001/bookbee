@@ -1,11 +1,47 @@
-const mongoose = require("mongoose")
+const mongoose = require("mongoose");
 
+/**
+ * Cab booking schema for private rides
+ */
 const cabBookingSchema = new mongoose.Schema({
-  pickupCity: {type: String, required: true},
-  exactPickup: {type: String, required: true},
-  dateTime: {type: Date, required: true},
-  hostedTripId: {type: mongoose.Schema.Types.ObjectId, ref: "HostedTrip", required: true}, // Add this
-  createdAt: {type: Date, default: Date.now},
-})
+  // Route Information
+  pickupCity: {
+    type: String,
+    required: [true, "Pickup city is required"],
+    trim: true,
+    lowercase: true
+  },
+  exactPickup: {
+    type: String,
+    required: [true, "Exact pickup location is required"],
+    trim: true
+  },
+  
+  // Booking Details
+  dateTime: {
+    type: Date,
+    required: [true, "Pickup date and time is required"]
+  },
+  
+  // Reference to hosted trip
+  tripId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Trip",
+    required: [true, "Trip reference is required"]
+  },
+  
+  // Booking Status
+  status: {
+    type: String,
+    enum: ["confirmed", "cancelled", "completed"],
+    default: "confirmed"
+  }
+}, {
+  timestamps: true
+});
 
-module.exports = mongoose.model("CabBooking", cabBookingSchema)
+// Indexes
+cabBookingSchema.index({ tripId: 1 });
+cabBookingSchema.index({ status: 1 });
+
+module.exports = mongoose.model("CabBooking", cabBookingSchema);

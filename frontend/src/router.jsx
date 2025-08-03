@@ -8,11 +8,12 @@ import HostTripList from "./pages/host/hostTripList"
 import EditTrip from "./pages/host/editTrip"
 import Homepage from "./pages/common/homePage"
 import BookingDetails from "./pages/user/bookingDetails"
+import HomePage from "./pages/HomePage"
 
 export const router = createBrowserRouter([
   {
     path: "/",
-    element: <Homepage />,
+    element: <HomePage />,
   },
   {
     path: "/",
