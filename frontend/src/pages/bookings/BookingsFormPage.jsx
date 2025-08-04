@@ -4,7 +4,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { TripService } from '../../services/tripService';
-import { BookingService } from '../../services/bookingService';
+import { userBookingOnServer } from '../../services/storeService';
 import { BOOKING_TYPES, APP_ROUTES } from '../../config/constants';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ErrorMessage from '../../components/common/ErrorMessage';
@@ -18,7 +18,7 @@ const BookingFormPage = () => {
   // State management
   const [trip, setTrip] = useState(null);
   const [bookingType, setBookingType] = useState(BOOKING_TYPES.SEAT);
-  const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
@@ -45,21 +45,52 @@ const BookingFormPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!formData || Object.keys(formData).length === 0) {
+    // Check if formData exists and has required fields
+    console.log('Submitting Form Data:', formData);
+    
+    if (!formData) {
       alert('Please fill all required fields.');
       return;
+    }
+    
+    // Validate all required fields have values
+    const hasEmptyFields = Object.values(formData).some(value => 
+      value === null || value === undefined || value === ''
+    );
+    
+    if (hasEmptyFields) {
+      alert('Please fill all required fields.');
+      return;
+    }
+
+    // Additional validation based on booking type
+    if (bookingType === BOOKING_TYPES.SEAT) {
+      if (!formData.pickupCity || !formData.dropCity || !formData.exactPickup || 
+          !formData.exactDrop || !formData.onDate || formData.onDate.trim() === '') {
+        alert('Please fill all required fields for seat booking.');
+        return;
+      }
+    } else if (bookingType === BOOKING_TYPES.CAB) {
+      if (!formData.pickupCity || !formData.exactPickup || 
+          !formData.dateTime || formData.dateTime.trim() === '') {
+        alert('Please fill all required fields for cab booking.');
+        return;
+      }
     }
 
     try {
       setSubmitting(true);
       
+      console.log('Form Data before submission:', formData);
+      
       const bookingData = {
+        ...formData,
         bookingType,
-        hostedTripId: tripId,
-        ...formData
+        hostedTripId: tripId
       };
 
-      await BookingService.createBooking(bookingData);
+      console.log('Booking Data being sent:', bookingData);
+      await userBookingOnServer(bookingData);
       navigate(APP_ROUTES.BOOKINGS);
     } catch (err) {
       alert(`Booking failed: ${err.message}`);
@@ -134,24 +165,36 @@ const BookingFormPage = () => {
               </label>
               <select
                 value={bookingType}
-                onChange={(e) => setBookingType(e.target.value)}
+                onChange={(e) => {
+                  console.log('Selected booking type:', e.target.value);
+                  setBookingType(e.target.value);
+                  setFormData(null); // Reset form data when changing booking type
+                }}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
               >
-                <option value={BOOKING_TYPES.SEAT}>Shared Ride (Book Seat)</option>
-                <option value={BOOKING_TYPES.CAB}>Private Ride (Reserve Cab)</option>
+                <option value="reserveSeat">Shared Ride (Book Seat)</option>
+                <option value="reserveCab">Private Ride (Reserve Cab)</option>
               </select>
             </div>
 
             {/* Dynamic Form Content */}
             {bookingType === BOOKING_TYPES.SEAT ? (
               <SeatBookingForm 
-                trip={trip} 
-                onFormDataChange={setFormData} 
+                key="seat-form"
+                selectedTripDetails={trip} 
+                onFormDataChange={(data) => {
+                  console.log('Seat Form Data:', data);
+                  setFormData(data);
+                }} 
               />
             ) : (
               <CabBookingForm 
-                trip={trip} 
-                onFormDataChange={setFormData} 
+                key="cab-form"
+                selectedTripDetails={trip} 
+                onFormDataChange={(data) => {
+                  console.log('Cab Form Data:', data);
+                  setFormData(data);
+                }} 
               />
             )}
 
@@ -186,30 +229,40 @@ const BookingFormPage = () => {
 /**
  * Seat booking form component
  */
-const SeatBookingForm = ({ trip, onFormDataChange }) => {
+const SeatBookingForm = ({ selectedTripDetails, onFormDataChange }) => {
   const [selectedPickup, setSelectedPickup] = useState('');
   const [selectedDrop, setSelectedDrop] = useState('');
   const [selectedDate, setSelectedDate] = useState('');
 
-  const { pickupCity, dropCity, exactPickup = [], exactDrop = [], seatFare } = trip;
+  const { pickupCity, dropCity, exactPickup = [], exactDrop = [], seatFare } = selectedTripDetails || {};
 
   // Update parent component when form data changes
   useEffect(() => {
-    if (selectedPickup && selectedDrop && selectedDate) {
-      const pickupCityOrigin = exactPickup.includes(selectedPickup) ? pickupCity : dropCity;
-      const dropCityDestination = exactPickup.includes(selectedDrop) ? pickupCity : dropCity;
+    // Create form data object with all fields, even if some are empty
+    const pickupCityOrigin = exactPickup.includes(selectedPickup) ? pickupCity : dropCity;
+    const dropCityDestination = exactPickup.includes(selectedDrop) ? pickupCity : dropCity;
 
-      onFormDataChange({
-        pickupCity: pickupCityOrigin,
-        exactPickup: selectedPickup,
-        dropCity: dropCityDestination,
-        exactDrop: selectedDrop,
-        onDate: selectedDate,
-      });
-    } else {
-      onFormDataChange({});
-    }
-  }, [selectedPickup, selectedDrop, selectedDate, exactPickup, exactDrop, pickupCity, dropCity, onFormDataChange]);
+    const formData = {
+      pickupCity: selectedPickup ? pickupCityOrigin : '',
+      exactPickup: selectedPickup || '',
+      dropCity: selectedDrop ? dropCityDestination : '',
+      exactDrop: selectedDrop || '',
+      onDate: selectedDate || '',
+    };
+    
+    // Log the form data being sent up
+    console.log('SeatBookingForm data:', formData);
+    onFormDataChange(formData);
+    
+  }, [selectedPickup, selectedDrop, selectedDate, exactPickup, pickupCity, dropCity]);
+
+  if (!selectedTripDetails) {
+    return (
+      <div className="flex justify-center items-center p-8">
+        <div className="text-gray-500">Loading trip details...</div>
+      </div>
+    );
+  }
 
   const isPickupFromPickupCity = exactPickup.includes(selectedPickup);
   const isPickupFromDropCity = exactDrop.includes(selectedPickup);
@@ -312,26 +365,36 @@ const SeatBookingForm = ({ trip, onFormDataChange }) => {
 /**
  * Cab booking form component
  */
-const CabBookingForm = ({ trip, onFormDataChange }) => {
+const CabBookingForm = ({ selectedTripDetails, onFormDataChange }) => {
   const [selectedPickup, setSelectedPickup] = useState('');
   const [dateTime, setDateTime] = useState('');
 
-  const { pickupCity, dropCity, exactPickup = [], exactDrop = [], kmRate } = trip;
+  const { pickupCity, dropCity, exactPickup = [], exactDrop = [], kmRate } = selectedTripDetails || {};
 
   // Update parent component when form data changes
   useEffect(() => {
+    // Only update if we have values
     if (selectedPickup && dateTime) {
       const pickupCityOrigin = exactPickup.includes(selectedPickup) ? pickupCity : dropCity;
 
-      onFormDataChange({
+      const formData = {
         pickupCity: pickupCityOrigin,
         exactPickup: selectedPickup,
         dateTime,
-      });
-    } else {
-      onFormDataChange({});
+      };
+      
+      // Only update if values have actually changed
+      onFormDataChange(formData);
     }
-  }, [selectedPickup, dateTime, exactPickup, pickupCity, dropCity, onFormDataChange]);
+  }, [selectedPickup, dateTime]); // Only depend on the selected values
+
+  if (!selectedTripDetails) {
+    return (
+      <div className="flex justify-center items-center p-8">
+        <div className="text-gray-500">Loading trip details...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

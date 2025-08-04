@@ -1,13 +1,13 @@
 import {createBrowserRouter} from "react-router-dom"
 import App from "./App"
-import Userbooking from "./pages/user/userbooking"
+import BookingsFormPage from "./pages/bookings/BookingsFormPage"
 import UserBookingsList from "./pages/user/userBookingsList"
 import TripsList from "./pages/user/userTripList"
 import HostingTrip from "./pages/host/hostingTrip"
 import HostTripList from "./pages/host/hostTripList"
 import EditTrip from "./pages/host/editTrip"
 import Homepage from "./pages/common/homePage"
-import BookingDetails from "./pages/user/bookingDetails"
+import BookingDetails from "./pages/user/BookingDetailsPage"
 import HomePage from "./pages/HomePage"
 
 export const router = createBrowserRouter([
@@ -21,7 +21,7 @@ export const router = createBrowserRouter([
     children: [
       {
         path: "book",
-        element: <Userbooking />,
+        element: <BookingsFormPage />,
       },
       {
         path: "bookings",
@@ -33,7 +33,7 @@ export const router = createBrowserRouter([
       },
       {
         path: "book/:tripId/",
-        element: <Userbooking />,
+        element: <BookingsFormPage />,
       },
       {
         path: "/cabbookings/:id",

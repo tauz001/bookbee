@@ -82,6 +82,14 @@ const BookingsListPage = () => {
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-12">
+      {/* Page Header */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">My Bookings</h1>
+        <p className="text-gray-600">
+          {seatBookings.length + cabBookings.length} total booking{seatBookings.length + cabBookings.length !== 1 ? 's' : ''}
+        </p>
+      </div>
+
       {/* Seat Bookings Section */}
       {seatBookings.length > 0 && (
         <section>
@@ -135,6 +143,7 @@ const BookingCard = ({ booking, type, onViewDetails }) => {
   const trip = booking.tripId;
 
   const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
@@ -153,10 +162,20 @@ const BookingCard = ({ booking, type, onViewDetails }) => {
 
   return (
     <Card hover className="relative">
+      {/* Vehicle Image Placeholder */}
+      <div className="h-48 bg-gradient-to-br from-yellow-100 to-yellow-200 rounded-lg mb-4 flex items-center justify-center">
+        <div className="text-yellow-600 opacity-50">
+          <svg className="w-16 h-16" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"/>
+            <path d="M3 4a1 1 0 00-1 1v10a1 1 0 002 0v-1h14v1a1 1 0 102 0V7.618a1 1 0 00-.553-.894L16 5.118V5a1 1 0 00-1-1H3z"/>
+          </svg>
+        </div>
+      </div>
+
       {/* Status Badge */}
       <div className="absolute top-4 right-4">
         <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full capitalize ${getStatusColor(booking.status)}`}>
-          {booking.status}
+          {booking.status || 'confirmed'}
         </span>
       </div>
 
@@ -230,4 +249,4 @@ const BookingCard = ({ booking, type, onViewDetails }) => {
   );
 };
 
-export default BookingsListPage;
+export default BookingsListPage

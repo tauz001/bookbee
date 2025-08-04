@@ -8,6 +8,7 @@ import CreateTripPage from './pages/host/CreateTripPage';
 import HostTripsListPage from './pages/host/HostTripsListPage';
 import { APP_ROUTES } from './config/constants';
 import BookingFormPage from './pages/bookings/BookingsFormPage';
+import BookingDetailsPage from './pages/user/BookingDetailsPage';
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
             <Route path={APP_ROUTES.TRIPS} element={<TripsListPage />} />
             <Route path={APP_ROUTES.BOOKINGS} element={<BookingsListPage />} />
             <Route path="/book/:tripId" element={<BookingFormPage />} />
+            <Route path="/bookings/:type/:id" element={<BookingDetailsPage />} />
             <Route path={APP_ROUTES.HOST_NEW} element={<CreateTripPage />} />
             <Route path={APP_ROUTES.HOST_TRIPS} element={<HostTripsListPage />} />
             <Route path="*" element={<NotFoundPage />} />
