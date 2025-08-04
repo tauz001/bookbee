@@ -34,6 +34,16 @@ const seatBookingSchema = new mongoose.Schema({
     required: [true, "Trip date is required"]
   },
   
+  numberOfSeats: {
+    type: Number,
+    required: [true, "Number of seats is required"],
+    min: [1, "At least one seat must be booked"],
+    validate: {
+      validator: Number.isInteger,
+      message: "Number of seats must be a whole number"
+    }
+  },
+  
   // Reference to hosted trip
   tripId: {
     type: mongoose.Schema.Types.ObjectId,

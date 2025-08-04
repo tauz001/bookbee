@@ -12,11 +12,16 @@ class SeatBookingController {
    */
   static async createSeatBooking(req, res, next) {
     try {
-      const { pickupCity, exactPickup, dropCity, exactDrop, onDate, hostedTripId } = req.body;
+      const { pickupCity, exactPickup, dropCity, exactDrop, onDate, hostedTripId, numberOfSeats } = req.body;
 
       // Validate required fields
-      if (!pickupCity || !exactPickup || !dropCity || !exactDrop || !onDate || !hostedTripId) {
+      if (!pickupCity || !exactPickup || !dropCity || !exactDrop || !onDate || !hostedTripId || !numberOfSeats) {
         return sendBadRequest(res, "All booking fields are required");
+      }
+
+      // Validate number of seats
+      if (!Number.isInteger(Number(numberOfSeats)) || numberOfSeats < 1) {
+        return sendBadRequest(res, "Invalid number of seats");
       }
 
       // Verify trip exists and is active
@@ -26,13 +31,19 @@ class SeatBookingController {
       }
 
       // Create booking
+      // Check if enough seats are available
+      if (trip.vehicle && trip.vehicle.seats < numberOfSeats) {
+        return sendBadRequest(res, "Not enough seats available");
+      }
+
       const booking = new SeatBooking({
         pickupCity,
         exactPickup,
         dropCity,
         exactDrop,
         tripDate: new Date(onDate),
-        tripId: hostedTripId
+        tripId: hostedTripId,
+        numberOfSeats
       });
 
       const savedBooking = await booking.save();

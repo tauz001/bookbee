@@ -36,9 +36,11 @@ const CreateTripPage = () => {
    */
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    // Convert vehicle number to uppercase
+    const newValue = name === 'number' ? value.toUpperCase() : value;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: newValue
     }));
   };
 
@@ -58,7 +60,8 @@ const CreateTripPage = () => {
         exactDrop: formData.exactDrop.trim().split(/\s+/),
         seatFare: parseInt(formData.seatFare),
         kmRate: parseInt(formData.kmRate),
-        seats: parseInt(formData.seats)
+        seats: parseInt(formData.seats),
+        number: formData.number.toUpperCase() // Ensure number is uppercase when submitting
       };
 
       await TripService.createTrip(tripData);
@@ -279,7 +282,9 @@ const CreateTripPage = () => {
                   value={formData.number}
                   onChange={handleInputChange}
                   placeholder="e.g., UP65 AB 1234"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-yellow-400 focus:border-transparent uppercase"
+                  style={{ textTransform: 'uppercase' }}
+                  autoCapitalize="characters"
                   required
                 />
               </div>

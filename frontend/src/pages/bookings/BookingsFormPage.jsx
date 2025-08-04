@@ -230,31 +230,35 @@ const BookingFormPage = () => {
  * Seat booking form component
  */
 const SeatBookingForm = ({ selectedTripDetails, onFormDataChange }) => {
-  const [selectedPickup, setSelectedPickup] = useState('');
-  const [selectedDrop, setSelectedDrop] = useState('');
-  const [selectedDate, setSelectedDate] = useState('');
+  const [formData, setFormData] = useState({
+    selectedPickup: '',
+    selectedDrop: '',
+    selectedDate: '',
+    numberOfSeats: '1'
+  });
 
   const { pickupCity, dropCity, exactPickup = [], exactDrop = [], seatFare } = selectedTripDetails || {};
 
   // Update parent component when form data changes
   useEffect(() => {
     // Create form data object with all fields, even if some are empty
-    const pickupCityOrigin = exactPickup.includes(selectedPickup) ? pickupCity : dropCity;
-    const dropCityDestination = exactPickup.includes(selectedDrop) ? pickupCity : dropCity;
+    const pickupCityOrigin = exactPickup.includes(formData.selectedPickup) ? pickupCity : dropCity;
+    const dropCityDestination = exactPickup.includes(formData.selectedDrop) ? pickupCity : dropCity;
 
-    const formData = {
-      pickupCity: selectedPickup ? pickupCityOrigin : '',
-      exactPickup: selectedPickup || '',
-      dropCity: selectedDrop ? dropCityDestination : '',
-      exactDrop: selectedDrop || '',
-      onDate: selectedDate || '',
+    const outputData = {
+      pickupCity: formData.selectedPickup ? pickupCityOrigin : '',
+      exactPickup: formData.selectedPickup || '',
+      dropCity: formData.selectedDrop ? dropCityDestination : '',
+      exactDrop: formData.selectedDrop || '',
+      onDate: formData.selectedDate || '',
+      numberOfSeats: formData.numberOfSeats
     };
     
     // Log the form data being sent up
-    console.log('SeatBookingForm data:', formData);
-    onFormDataChange(formData);
+    console.log('SeatBookingForm data:', outputData);
+    onFormDataChange(outputData);
     
-  }, [selectedPickup, selectedDrop, selectedDate, exactPickup, pickupCity, dropCity]);
+  }, [formData, exactPickup, pickupCity, dropCity]);
 
   if (!selectedTripDetails) {
     return (
@@ -264,8 +268,8 @@ const SeatBookingForm = ({ selectedTripDetails, onFormDataChange }) => {
     );
   }
 
-  const isPickupFromPickupCity = exactPickup.includes(selectedPickup);
-  const isPickupFromDropCity = exactDrop.includes(selectedPickup);
+  const isPickupFromPickupCity = exactPickup.includes(formData.selectedPickup);
+  const isPickupFromDropCity = exactDrop.includes(formData.selectedPickup);
 
   return (
     <div className="space-y-6">
@@ -292,8 +296,8 @@ const SeatBookingForm = ({ selectedTripDetails, onFormDataChange }) => {
           Pickup Location *
         </label>
         <select
-          value={selectedPickup}
-          onChange={(e) => setSelectedPickup(e.target.value)}
+          value={formData.selectedPickup}
+          onChange={(e) => setFormData({ ...formData, selectedPickup: e.target.value })}
           className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
           required
         >
@@ -321,9 +325,9 @@ const SeatBookingForm = ({ selectedTripDetails, onFormDataChange }) => {
           Drop Location *
         </label>
         <select
-          value={selectedDrop}
-          onChange={(e) => setSelectedDrop(e.target.value)}
-          disabled={!selectedPickup}
+          value={formData.selectedDrop}
+          onChange={(e) => setFormData({ ...formData, selectedDrop: e.target.value })}
+          disabled={!formData.selectedPickup}
           className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-yellow-400 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
           required
         >
@@ -339,7 +343,7 @@ const SeatBookingForm = ({ selectedTripDetails, onFormDataChange }) => {
             </option>
           ))}
         </select>
-        {!selectedPickup && (
+        {!formData.selectedPickup && (
           <p className="mt-1 text-sm text-gray-500">Please select pickup location first</p>
         )}
       </div>
@@ -351,12 +355,33 @@ const SeatBookingForm = ({ selectedTripDetails, onFormDataChange }) => {
         </label>
         <input
           type="date"
-          value={selectedDate}
-          onChange={(e) => setSelectedDate(e.target.value)}
+          value={formData.selectedDate}
+          onChange={(e) => setFormData({ ...formData, selectedDate: e.target.value })}
           min={new Date().toISOString().split('T')[0]}
           className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
           required
         />
+      </div>
+
+      {/* Number of Seats */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Number of Seats *
+        </label>
+        <select
+          value={formData.numberOfSeats}
+          onChange={(e) => setFormData({ ...formData, numberOfSeats: e.target.value })}
+          className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
+          required
+        >
+          {[...Array(selectedTripDetails.vehicle?.seats || 0)].map((_, idx) => {
+            const num = idx + 1;
+            return (
+              <option key={num} value={num}>{num} {num === 1 ? 'Seat' : 'Seats'}</option>
+            );
+          })}
+        </select>
+        <p className="mt-1 text-sm text-gray-500">Select the number of seats you want to book</p>
       </div>
     </div>
   );

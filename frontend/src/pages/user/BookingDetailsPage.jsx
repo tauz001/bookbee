@@ -132,6 +132,12 @@ const BookingDetailsPage = () => {
                     <span className="font-medium">Booked On:</span>
                     <p>{formatDate(booking.createdAt)}</p>
                   </div>
+                  {!isCabBooking(booking) && (
+                    <div>
+                      <span className="font-medium">Number of Seats:</span>
+                      <p>{booking.numberOfSeats || 1} seat(s)</p>
+                    </div>
+                  )}
                 </div>
 
                 <div>
@@ -188,6 +194,12 @@ const BookingDetailsPage = () => {
                     <p className="text-xs text-gray-500">City: {booking.dropCity}</p>
                   </div>
                 )}
+                {!isCabBooking(booking) && (
+                  <div className="mt-4">
+                    <h4 className="font-medium text-gray-800 mb-1">Seats Booked</h4>
+                    <p className="text-gray-600">{booking.numberOfSeats || 1} seat(s)</p>
+                  </div>
+                )}
               </div>
             </Card>
 
@@ -212,8 +224,16 @@ const BookingDetailsPage = () => {
                 // Seat booking fare display
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Seats</span>
+                    <span className="font-medium">{booking.numberOfSeats || 1}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Seat Fare</span>
-                    <span className="font-medium">₹{trip?.seatFare || 'N/A'}</span>
+                    <span className="font-medium">₹{trip?.seatFare || 'N/A'} × {booking.numberOfSeats || 1}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Seat Subtotal</span>
+                    <span className="font-medium">₹{(trip?.seatFare || 0) * (booking.numberOfSeats || 1)}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Tax & Charges</span>
@@ -222,7 +242,7 @@ const BookingDetailsPage = () => {
                   <hr className="my-2"/>
                   <div className="flex justify-between font-semibold text-gray-900">
                     <span>Total Amount</span>
-                    <span className="text-yellow-600">₹{(trip?.seatFare || 0) + (trip?.taxAmount || 0)}</span>
+                    <span className="text-yellow-600">₹{((trip?.seatFare || 0) * (booking.numberOfSeats || 1)) + (trip?.taxAmount || 0)}</span>
                   </div>
                 </div>
               )}
