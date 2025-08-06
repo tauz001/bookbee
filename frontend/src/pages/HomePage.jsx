@@ -8,7 +8,7 @@ import Card from '../components/common/Card';
 import heroImage from '../assets/vehicleImg01.jpg';
 import logo from '../assets/BB-icon.png';
 
-const HomePage = () => {
+const HomePage = ({ isLoginModalOpen, setIsLoginModalOpen, isSignUpModalOpen, setIsSignUpModalOpen }) => {
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -65,6 +65,82 @@ const HomePage = () => {
     }
   ];
 
+  // Login Modal (Mobile Number + Password)
+  const LoginModal = () => (
+    <div className="fixed inset-0 flex items-center justify-center z-50" style={{ background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(8px)' }}>
+      <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md border border-amber-100 relative">
+        <button
+          onClick={() => setIsLoginModalOpen(false)}
+          className="absolute -top-4 -right-4 bg-white border border-gray-300 rounded-full p-2 shadow-lg text-gray-500 hover:text-amber-600 text-2xl flex items-center justify-center"
+          style={{ width: '40px', height: '40px' }}
+          aria-label="Close"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-6 h-6">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+        <h2 className="text-3xl font-bold mb-4 text-amber-600 text-center">Login</h2>
+        <form className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Mobile Number</label>
+            <input type="text" className="w-full px-4 py-2 border border-amber-200 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent" placeholder="Enter your mobile number" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+            <input type="password" className="w-full px-4 py-2 border border-amber-200 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent" placeholder="Enter your password" />
+          </div>
+          <button type="submit" className="w-full bg-amber-500 text-white py-2 rounded-lg hover:bg-amber-600 transition-colors font-semibold shadow">Login</button>
+        </form>
+        <div className="mt-4 text-center text-sm">
+          <span className="text-gray-600">Don't have an account? </span>
+          <button className="text-amber-600 hover:underline font-semibold" onClick={() => { setIsLoginModalOpen(false); setIsSignUpModalOpen(true); }}>Sign Up</button>
+        </div>
+      </div>
+    </div>
+  );
+
+  // Sign Up Modal (Mobile Number + Name + Password + Confirm Password)
+  const SignUpModal = () => (
+    <div className="fixed inset-0 flex items-center justify-center z-50" style={{ background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(8px)' }}>
+      <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md border border-amber-100 relative">
+        <button
+          onClick={() => setIsSignUpModalOpen(false)}
+          className="absolute -top-4 -right-4 bg-white border border-gray-300 rounded-full p-2 shadow-lg text-gray-500 hover:text-amber-600 text-2xl flex items-center justify-center"
+          style={{ width: '40px', height: '40px' }}
+          aria-label="Close"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-6 h-6">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+        <h2 className="text-3xl font-bold mb-4 text-amber-600 text-center">Sign Up</h2>
+        <form className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Mobile Number</label>
+            <input type="text" className="w-full px-4 py-2 border border-amber-200 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent" placeholder="Enter your mobile number" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+            <input type="text" className="w-full px-4 py-2 border border-amber-200 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent" placeholder="Enter your name" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+            <input type="password" className="w-full px-4 py-2 border border-amber-200 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent" placeholder="Create a password" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+            <input type="password" className="w-full px-4 py-2 border border-amber-200 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent" placeholder="Confirm your password" />
+          </div>
+          <button type="submit" className="w-full bg-amber-500 text-white py-2 rounded-lg hover:bg-amber-600 transition-colors font-semibold shadow">Sign Up</button>
+        </form>
+        <div className="mt-4 text-center text-sm">
+          <span className="text-gray-600">Already have an account? </span>
+          <button className="text-amber-600 hover:underline font-semibold" onClick={() => { setIsSignUpModalOpen(false); setIsLoginModalOpen(true); }}>Login</button>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div className="min-h-screen">
       {/* Mobile Navigation */}
@@ -74,6 +150,18 @@ const HomePage = () => {
             {/* Logo */}
             <img src={logo} alt="BookBee Logo" className="h-8 w-auto" />
             
+            {/* Auth Buttons - Visible on Desktop */}
+            <div className="hidden md:flex items-center space-x-4 mr-4">
+              <button className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-yellow-600 transition-colors">
+                Login
+              </button>
+              <button className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors">
+                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </button>
+            </div>
+
             {/* Hamburger button */}
             <button
               onClick={toggleMenu}
@@ -142,6 +230,28 @@ const HomePage = () => {
                 <a href="#" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
                   Contact Us
                 </a>
+                <hr className="my-2" />
+                <button
+                  onClick={() => {
+                    setIsLoginModalOpen(true);
+                    setIsMenuOpen(false);
+                  }}
+                  className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+                >
+                  Login
+                </button>
+                <button
+                  onClick={() => {
+                    // Add profile navigation logic here
+                    setIsMenuOpen(false);
+                  }}
+                  className="flex items-center w-full px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+                >
+                  <span>Profile</span>
+                  <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </button>
               </div>
             </div>
           )}
@@ -468,6 +578,10 @@ const HomePage = () => {
         </div>
       </section>
 
+      {/* Login Modal */}
+      {isLoginModalOpen && <LoginModal />}
+      {isSignUpModalOpen && <SignUpModal />}
+
       {/* Footer */}
       <footer className="bg-gray-900 text-gray-300">
         <div className="container mx-auto px-4 py-16">
@@ -497,9 +611,9 @@ const HomePage = () => {
             <div>
               <h3 className="font-semibold text-white mb-4">Legal</h3>
               <ul className="space-y-2">
-                <li><a href="#" className="hover:text-yellow-400">Terms of Service</a></li>
-                <li><a href="#" className="hover:text-yellow-400">Privacy Policy</a></li>
-                <li><a href="#" className="hover:text-yellow-400">Cookie Policy</a></li>
+                <li><a href="/terms-of-service" className="hover:text-yellow-400">Terms of Service</a></li>
+                <li><a href="/privacy-policy" className="hover:text-yellow-400">Privacy Policy</a></li>
+                <li><a href="/cookie-policy" className="hover:text-yellow-400">Cookie Policy</a></li>
               </ul>
             </div>
             <div>
