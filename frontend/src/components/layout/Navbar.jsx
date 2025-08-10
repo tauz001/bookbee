@@ -4,9 +4,11 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { APP_ROUTES } from '../../config/constants';
+import ProfileDropdown from '../common/ProfileDropdown';
 
 const Navbar = ({ setIsLoginModalOpen, setIsSignUpModalOpen }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   const navItems = [
     { path: APP_ROUTES.TRIPS, label: 'Available Trips' },
@@ -66,11 +68,20 @@ const Navbar = ({ setIsLoginModalOpen, setIsSignUpModalOpen }) => {
               >
                 Sign Up
               </button>
-              <button className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors">
-                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-              </button>
+              <div className="relative">
+                <button 
+                  className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
+                  onClick={() => setIsProfileOpen(!isProfileOpen)}
+                >
+                  <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </button>
+                <ProfileDropdown 
+                  isOpen={isProfileOpen}
+                  onClose={() => setIsProfileOpen(false)}
+                />
+              </div>
             </div>
           </div>
 

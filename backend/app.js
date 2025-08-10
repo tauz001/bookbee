@@ -7,6 +7,7 @@ const connectDatabase = require("./config/database");
 const errorHandler = require("./middleware/errorHandler");
 const tripRoutes = require("./routes/tripRoutes");
 const bookingRoutes = require("./routes/bookingRoutes");
+const contactRoutes = require("./routes/contactRoutes");
 const { PORT, CORS_ORIGIN } = require("./config/constants");
 
 /**
@@ -39,6 +40,8 @@ app.get("/api/health", (req, res) => {
 // API Routes
 app.use("/api/trips", tripRoutes);
 app.use("/api/bookings", bookingRoutes);
+app.use("/api/contact", contactRoutes); 
+
 
 // 404 handler
 app.use("*", (req, res) => {

@@ -6,7 +6,8 @@ export const API_CONFIG = {
   ENDPOINTS: {
     TRIPS: "/trips",
     BOOKINGS: "/bookings",
-    HEALTH: "/health"
+    HEALTH: "/health",
+    CONTACT: "/contact"
   }
 };
 

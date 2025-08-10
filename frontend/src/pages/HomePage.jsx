@@ -7,14 +7,88 @@ import Card from '../components/common/Card';
 // Import images
 import heroImage from '../assets/vehicleImg01.jpg';
 import logo from '../assets/BB-icon.png';
+import { HomePageService } from '../services/homePageService';
 
 const HomePage = ({ isLoginModalOpen, setIsLoginModalOpen, isSignUpModalOpen, setIsSignUpModalOpen }) => {
   const navigate = useNavigate();
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+const [modalMessage, setModalMessage] = useState('');
+const [modalType, setModalType] = useState('success'); // 'success' or 'error'
+
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
+  
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
+
+  // const handleContactFormSubmit = (e) => {
+  //   e.preventDefault();
+  //   // Handle contact form submission logic here
+  //   console.log('Contact form submitted');
+  // };
+
+  const handleInputChange = (e) => {
+  const { name, value } = e.target;
+  
+  setContactFormData(prev => ({
+    ...prev,
+    [name]: value
+  }));
+};
+
+  const [contactFormData, setContactFormData] = useState({
+      firstName: '',
+      lastName: '',
+      email: '',
+      subject: '',
+      message: '',
+      
+    });
+const handleSubmitContact = async (e) => {
+  e.preventDefault();
+  
+  try {
+    setSubmitting(true);
+    
+    const contactData = {
+      firstName: contactFormData.firstName.trim(),
+      lastName: contactFormData.lastName.trim(),
+      email: contactFormData.email.trim(),
+      subject: contactFormData.subject.trim(),
+      message: contactFormData.message.trim(),
+    };
+    
+    console.log('Submitting contact form:', contactData);
+    
+    await HomePageService.submitContactForm(contactData);
+    
+    // Show success modal
+    setModalType('success');
+    setModalMessage('Thank you for your message! We\'ll get back to you within 24 hours.');
+    setShowSuccessModal(true);
+    
+    // Reset form
+    setContactFormData({
+      firstName: '',
+      lastName: '',
+      email: '',
+      subject: '',
+      message: '',
+    });
+    
+  } catch (err) {
+    console.error('Contact form error:', err);
+    // Show error modal
+    setModalType('error');
+    setModalMessage(`Sorry, there was an error sending your message: ${err.message}`);
+    setShowSuccessModal(true);
+  } finally {
+    setSubmitting(false);
+  }
+};
+
 
   const stats = [
     { number: '10K+', label: 'Happy Travelers' },
@@ -140,6 +214,95 @@ const HomePage = ({ isLoginModalOpen, setIsLoginModalOpen, isSignUpModalOpen, se
       </div>
     </div>
   );
+
+  const SuccessModal = () => (
+  <div className="fixed inset-0 flex items-center justify-center z-50" style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(8px)' }}>
+    <div className="bg-white rounded-3xl shadow-2xl p-8 w-full max-w-md mx-4 border border-gray-100 relative animate-fadeIn">
+      {/* Close button */}
+      <button
+        onClick={() => setShowSuccessModal(false)}
+        className="absolute -top-3 -right-3 bg-white border-2 border-gray-200 rounded-full p-2 shadow-lg text-gray-400 hover:text-gray-600 hover:border-gray-300 transition-all duration-200 flex items-center justify-center"
+        style={{ width: '44px', height: '44px' }}
+        aria-label="Close"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-6 h-6">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+
+      {/* Icon */}
+      <div className="text-center mb-6">
+        <div className={`inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 ${
+          modalType === 'success' 
+            ? 'bg-green-100 text-green-600' 
+            : 'bg-red-100 text-red-600'
+        }`}>
+          {modalType === 'success' ? (
+            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+            </svg>
+          ) : (
+            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          )}
+        </div>
+        
+        <h3 className={`text-2xl font-bold mb-2 ${
+          modalType === 'success' ? 'text-gray-900' : 'text-red-600'
+        }`}>
+          {modalType === 'success' ? 'Message Sent!' : 'Oops! Something went wrong'}
+        </h3>
+        
+        <p className="text-gray-600 leading-relaxed">
+          {modalMessage}
+        </p>
+      </div>
+
+      {/* Action buttons */}
+      <div className="flex gap-3">
+        {modalType === 'success' ? (
+          <>
+            <button
+              onClick={() => setShowSuccessModal(false)}
+              className="flex-1 bg-amber-500 text-white py-3 px-6 rounded-xl hover:bg-amber-600 transition-colors font-semibold shadow-sm"
+            >
+              Great!
+            </button>
+            <button
+              onClick={() => {
+                setShowSuccessModal(false);
+                // Scroll to contact form for another message
+                document.querySelector('#contact-section')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="flex-1 border-2 border-amber-500 text-amber-600 py-3 px-6 rounded-xl hover:bg-amber-50 transition-colors font-semibold"
+            >
+              Send Another
+            </button>
+          </>
+        ) : (
+          <>
+            <button
+              onClick={() => setShowSuccessModal(false)}
+              className="flex-1 bg-gray-600 text-white py-3 px-6 rounded-xl hover:bg-gray-700 transition-colors font-semibold shadow-sm"
+            >
+              Close
+            </button>
+            <button
+              onClick={() => {
+                setShowSuccessModal(false);
+                // You could add retry logic here or just close
+              }}
+              className="flex-1 border-2 border-amber-500 text-amber-600 py-3 px-6 rounded-xl hover:bg-amber-50 transition-colors font-semibold"
+            >
+              Try Again
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  </div>
+);
 
   return (
     <div className="min-h-screen">
@@ -395,21 +558,97 @@ const HomePage = ({ isLoginModalOpen, setIsLoginModalOpen, isSignUpModalOpen, se
         </div>
 
         <style jsx>{`
-          @keyframes marquee {
-            0% {
-              transform: translateX(0);
-            }
-            100% {
-              transform: translateX(-50%);
-            }
-          }
-          .animate-marquee {
-            animation: marquee 20s linear infinite;
-            &:hover {
-              animation-play-state: paused;
-            }
-          }
+           @keyframes marquee {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+  .animate-marquee {
+    animation: marquee 20s linear infinite;
+    &:hover {
+      animation-play-state: paused;
+    }
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: scale(0.9) translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+  .animate-fadeIn {
+    animation: fadeIn 0.3s ease-out;
+  }
+  
+  @keyframes pulse {
+    0%, 100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.05);
+    }
+  }
+  .animate-pulse-subtle {
+    animation: pulse 2s infinite;
+  }
+`}</style>
+
+// OR if you want to keep them separate, create TWO style blocks:
+
+{/* Existing marquee styles */}
+<style jsx>{`
+  @keyframes marquee {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+  .animate-marquee {
+    animation: marquee 20s linear infinite;
+    &:hover {
+      animation-play-state: paused;
+    }
+  }
+`}</style>
+
+{/* New modal styles */}
+<style jsx>{`
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: scale(0.9) translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+  .animate-fadeIn {
+    animation: fadeIn 0.3s ease-out;
+  }
+  
+  @keyframes pulse {
+    0%, 100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.05);
+    }
+  }
+  .animate-pulse-subtle {
+    animation: pulse 2s infinite;
+  }
         `}</style>
+        
       </section>
 
       {/* CTA Section */}
@@ -444,8 +683,8 @@ const HomePage = ({ isLoginModalOpen, setIsLoginModalOpen, isSignUpModalOpen, se
       </section>
 
       {/* Contact Section */}
-      <section className="min-h-screen bg-gradient-to-br from-amber-50 to-amber-100/50 py-16">
-        <div className="container mx-auto px-4">
+      {showSuccessModal && <SuccessModal />}
+<section id="contact-section" className="min-h-screen bg-gradient-to-br from-amber-50 to-amber-100/50 py-16">        <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-12">
               <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4 tracking-tight">
@@ -508,74 +747,110 @@ const HomePage = ({ isLoginModalOpen, setIsLoginModalOpen, isSignUpModalOpen, se
               {/* Contact Form */}
               <div className="bg-white rounded-2xl p-8 shadow-sm">
                 <h3 className="text-2xl font-bold text-gray-900 mb-6">Send us a Message</h3>
-                <form className="space-y-6">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        First Name
-                      </label>
-                      <input
-                        type="text"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent"
-                        placeholder="John"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Last Name
-                      </label>
-                      <input
-                        type="text"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent"
-                        placeholder="Doe"
-                      />
-                    </div>
-                  </div>
+                <form className="space-y-6" onSubmit={handleSubmitContact}>
+  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-2">
+        First Name
+      </label>
+      <input
+        name="firstName"          // ADD THIS
+        onChange={handleInputChange}
+        value={contactFormData.firstName}
+        type="text"
+        required                  // ADD THIS
+        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent"
+        placeholder="John"
+      />
+    </div>
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-2">
+        Last Name
+      </label>
+      <input
+        name="lastName"           // ADD THIS
+        onChange={handleInputChange}
+        value={contactFormData.lastName}
+        type="text"
+        required                  // ADD THIS
+        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent"
+        placeholder="Doe"
+      />
+    </div>
+  </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Email
-                    </label>
-                    <input
-                      type="email"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent"
-                      placeholder="john@example.com"
-                    />
-                  </div>
+  <div>
+    <label className="block text-sm font-medium text-gray-700 mb-2">
+      Email
+    </label>
+    <input
+      name="email"               // ADD THIS
+      onChange={handleInputChange}
+      value={contactFormData.email}
+      type="email"
+      required                   // ADD THIS
+      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent"
+      placeholder="john@example.com"
+    />
+  </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Subject
-                    </label>
-                    <input
-                      type="text"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent"
-                      placeholder="How can we help?"
-                    />
-                  </div>
+  <div>
+    <label className="block text-sm font-medium text-gray-700 mb-2">
+      Subject
+    </label>
+    <input
+      name="subject"             // ADD THIS
+      onChange={handleInputChange}
+      value={contactFormData.subject}
+      type="text"
+      required                   // ADD THIS
+      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent"
+      placeholder="How can we help?"
+    />
+  </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Message
-                    </label>
-                    <textarea
-                      rows="4"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent"
-                      placeholder="Your message..."
-                    ></textarea>
-                  </div>
+  <div>
+    <label className="block text-sm font-medium text-gray-700 mb-2">
+      Message
+    </label>
+    <textarea
+      name="message"             // ADD THIS
+      onChange={handleInputChange}
+      value={contactFormData.message}
+      rows="4"
+      required                   // ADD THIS
+      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent"
+      placeholder="Your message..."
+    ></textarea>
+  </div>
 
-                  <Button
-                    type="submit"
-                    className="w-full bg-amber-500 text-white hover:bg-amber-600"
-                  >
-                    Send Message
-                  </Button>
-                </form>
+  <Button
+  type="submit"
+  className="w-full bg-amber-500 text-white hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+  disabled={submitting}
+>
+  {submitting ? (
+    <>
+      <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      Sending...
+    </>
+  ) : (
+    'Send Message'
+  )}
+</Button>
+</form>
               </div>
             </div>
           </div>
         </div>
+        
+        <style jsx>{`
+      
+    `}</style>
+
       </section>
 
       {/* Login Modal */}
