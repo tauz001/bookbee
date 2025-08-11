@@ -358,6 +358,7 @@ const SeatBookingForm = ({ selectedTripDetails, onFormDataChange }) => {
           value={formData.selectedDate}
           onChange={(e) => setFormData({ ...formData, selectedDate: e.target.value })}
           min={new Date().toISOString().split('T')[0]}
+          max={new Date(new Date().setDate(new Date().getDate() + 7)).toISOString().split('T')[0]}
           className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
           required
         />

@@ -13,6 +13,7 @@ import PrivacyPolicyPage from './pages/legal/PrivacyPolicyPage';
 import TermsOfServicePage from './pages/legal/TermsOfServicePage';
 import CookiePolicyPage from './pages/legal/CookiePolicyPage';
 import ProfilePage from './pages/user/ProfilePage';
+import HostDashboard from './pages/host/HostDashboard,';
 
 function App() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
@@ -35,6 +36,8 @@ function App() {
             <Route path="/terms-of-service" element={<TermsOfServicePage />} />
             <Route path="/cookie-policy" element={<CookiePolicyPage />} />
             <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/host-dashboard" element={<HostDashboard />} />
+
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </main>
