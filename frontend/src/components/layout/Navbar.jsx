@@ -14,7 +14,8 @@ const Navbar = ({ setIsLoginModalOpen, setIsSignUpModalOpen }) => {
     { path: APP_ROUTES.TRIPS, label: 'Available Trips' },
     { path: APP_ROUTES.BOOKINGS, label: 'My Bookings' },
     { path: APP_ROUTES.HOST_TRIPS, label: 'Host Trips' },
-    { path: APP_ROUTES.HOST_NEW, label: 'Host New Trip' }
+    { path: APP_ROUTES.HOST_NEW, label: 'Host New Trip' },
+    { path: APP_ROUTES.HOST_DASHBOARD, label: 'Host Dashboard' }
   ];
 
   return (

@@ -17,7 +17,9 @@ export const APP_ROUTES = {
   BOOKINGS: "/bookings",
   BOOK_TRIP: "/book",
   HOST_NEW: "/host/new",
-  HOST_TRIPS: "/host/trips"
+  HOST_TRIPS: "/host/trips",
+  HOST_DASHBOARD: "/host/dashboard",
+  PRIVACY_POLICY: "/privacy-policy",
 };
 
 export const BOOKING_TYPES = {

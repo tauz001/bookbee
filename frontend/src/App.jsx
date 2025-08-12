@@ -36,8 +36,7 @@ function App() {
             <Route path="/terms-of-service" element={<TermsOfServicePage />} />
             <Route path="/cookie-policy" element={<CookiePolicyPage />} />
             <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/host-dashboard" element={<HostDashboard />} />
-
+            <Route path={APP_ROUTES.HOST_DASHBOARD} element={<HostDashboard />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </main>

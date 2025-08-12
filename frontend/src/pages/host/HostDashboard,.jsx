@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, Users, Car, Clock, MapPin, Filter, Search, Eye, CheckCircle, XCircle } from 'lucide-react';
+import LoadingSpinner from '../../components/common/LoadingSpinner';
 
 const HostDashboard = () => {
   const [seatBookings, setSeatBookings] = useState([]);
@@ -191,14 +192,7 @@ const HostDashboard = () => {
   const filteredCabBookings = getFilteredBookings(cabBookings);
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading bookings...</p>
-        </div>
-      </div>
-    );
+     return <LoadingSpinner text="Loading your dashboard..." />;
   }
 
   if (error) {
