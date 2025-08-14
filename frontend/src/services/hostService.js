@@ -1,12 +1,23 @@
+// frontend/src/services/hostService.js - UPDATED
 const API_BASE_URL = "http://localhost:3000/api";
+
+const fetchWithConfig = (url, options = {}) => {
+  return fetch(url, {
+    ...options,
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+      ...options.headers
+    }
+  });
+};
 
 export const hostTripToServer = async (pickupCity, exactPickup, exactDrop, dropCity, seatFare, kmRate, date, model, number, type, seats) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/trips`, {
+    console.log('🔄 Creating trip...');
+    
+    const response = await fetchWithConfig(`${API_BASE_URL}/trips`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
       body: JSON.stringify({
         pickupCity, 
         exactPickup, 
@@ -19,25 +30,32 @@ export const hostTripToServer = async (pickupCity, exactPickup, exactDrop, dropC
         number, 
         type, 
         seats
-      }),
+      })
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      let errorMessage = `HTTP error! status: ${response.status}`;
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.message || errorMessage;
+      } catch {
+        errorMessage = response.statusText || errorMessage;
+      }
+      throw new Error(errorMessage);
     }
 
     const result = await response.json();
+    console.log('✅ Trip created successfully');
     return result.data;
   } catch (error) {
-    console.error("Error posting trip:", error);
+    console.error('❌ Error creating trip:', error);
     throw error;
   }
 };
 
 export const getHostedTrips = async () => {
   try {
-    const response = await fetch(`${API_BASE_URL}/trips`);
+    const response = await fetchWithConfig(`${API_BASE_URL}/trips`);
     
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -46,14 +64,14 @@ export const getHostedTrips = async () => {
     const result = await response.json();
     return result.data;
   } catch (error) {
-    console.error("Error fetching trips:", error);
+    console.error('❌ Error fetching trips:', error);
     throw error;
   }
 };
 
 export const getHostedTrip = async (tripId) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/trips/${tripId}`);
+    const response = await fetchWithConfig(`${API_BASE_URL}/trips/${tripId}`);
     
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -62,49 +80,58 @@ export const getHostedTrip = async (tripId) => {
     const result = await response.json();
     return result.data;
   } catch (error) {
-    console.error("Error fetching trip:", error);
+    console.error('❌ Error fetching trip:', error);
     throw error;
   }
 };
 
 export const updateTrip = async (tripId, tripData) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/trips/${tripId}`, {
+    const response = await fetchWithConfig(`${API_BASE_URL}/trips/${tripId}`, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(tripData),
+      body: JSON.stringify(tripData)
     });
     
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      let errorMessage = `HTTP error! status: ${response.status}`;
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.message || errorMessage;
+      } catch {
+        errorMessage = response.statusText || errorMessage;
+      }
+      throw new Error(errorMessage);
     }
     
     const result = await response.json();
     return result.data;
   } catch (error) {
-    console.error("Error updating trip:", error);
+    console.error('❌ Error updating trip:', error);
     throw error;
   }
 };
 
 export const deleteTrip = async (tripId) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/trips/${tripId}`, {
-      method: "DELETE",
+    const response = await fetchWithConfig(`${API_BASE_URL}/trips/${tripId}`, {
+      method: "DELETE"
     });
     
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      let errorMessage = `HTTP error! status: ${response.status}`;
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.message || errorMessage;
+      } catch {
+        errorMessage = response.statusText || errorMessage;
+      }
+      throw new Error(errorMessage);
     }
     
     const result = await response.json();
     return result.data;
   } catch (error) {
-    console.error("Error deleting trip:", error);
+    console.error('❌ Error deleting trip:', error);
     throw error;
   }
 };

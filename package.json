@@ -1,0 +1,13 @@
+{
+  "name": "bookbee-fullstack",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "concurrently -k -p \"[{name}]\" -n \"🚀Backend,⚡Frontend\" -c \"blue.bold,green.bold\" \"npm run server\" \"npm run client\"",
+    "server": "cd backend && npm start",
+    "client": "cd frontend && npm run dev",
+    "install-all": "npm install && cd backend && npm install && cd ../frontend && npm install"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

@@ -1,13 +1,11 @@
-/**
- * Frontend application constants
- */
 export const API_CONFIG = {
   BASE_URL: "http://localhost:3000/api",
   ENDPOINTS: {
     TRIPS: "/trips",
     BOOKINGS: "/bookings",
     HEALTH: "/health",
-    CONTACT: "/contact"
+    CONTACT: "/contact",
+    AUTH: "/auth" // ADD THIS
   }
 };
 
@@ -20,6 +18,8 @@ export const APP_ROUTES = {
   HOST_TRIPS: "/host/trips",
   HOST_DASHBOARD: "/host/dashboard",
   PRIVACY_POLICY: "/privacy-policy",
+  PROFILE: "/profile", // ADD THIS
+  LOGIN: "/login", // ADD THIS
 };
 
 export const BOOKING_TYPES = {
@@ -33,7 +33,12 @@ export const BOOKING_STATUS = {
   COMPLETED: "completed"
 };
 
-// Theme configuration
+export const USER_TYPES = { // ADD THIS
+  COMMUTER: "commuter",
+  HOST: "host"
+};
+
+// Theme configuration (unchanged)
 export const THEME = {
   colors: {
     primary: {

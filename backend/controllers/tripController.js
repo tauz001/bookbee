@@ -7,10 +7,19 @@ const { sendSuccess, sendCreated, sendNotFound, sendBadRequest, sendServerError 
 class TripController {
   
   /**
-   * Create a new hosted trip
+   * Create a new hosted trip (HOST ONLY)
    */
   static async createTrip(req, res, next) {
     try {
+      // Check if user is authenticated and is a host
+      if (!req.session.userId) {
+        return sendBadRequest(res, "Authentication required");
+      }
+      
+      if (req.session.userType !== 'host') {
+        return sendBadRequest(res, "Only hosts can create trips");
+      }
+
       const {
         pickupCity,
         exactPickup,
@@ -25,7 +34,7 @@ class TripController {
         seats
       } = req.body;
 
-      // Create trip with nested vehicle object
+      // Create trip with nested vehicle object and host reference
       const trip = new Trip({
         pickupCity,
         exactPickup,
@@ -39,7 +48,8 @@ class TripController {
           number,
           type,
           seats
-        }
+        },
+        hostId: req.session.userId // ADD HOST REFERENCE
       });
 
       const savedTrip = await trip.save();
@@ -55,7 +65,9 @@ class TripController {
    */
   static async getAllTrips(req, res, next) {
     try {
-      const trips = await Trip.find({ isActive: true }).sort({ createdAt: -1 });
+      const trips = await Trip.find({ isActive: true })
+        .populate('hostId', 'name mobile userType') // POPULATE HOST INFO
+        .sort({ createdAt: -1 });
       sendSuccess(res, trips, "Trips retrieved successfully");
     } catch (error) {
       next(error);
@@ -68,7 +80,8 @@ class TripController {
   static async getTripById(req, res, next) {
     try {
       const { id } = req.params;
-      const trip = await Trip.findById(id);
+      const trip = await Trip.findById(id)
+        .populate('hostId', 'name mobile userType');
 
       if (!trip) {
         return sendNotFound(res, "Trip not found");
@@ -81,47 +94,90 @@ class TripController {
   }
 
   /**
-   * Update trip by ID
+   * Update trip by ID (HOST ONLY - OWN TRIPS)
    */
   static async updateTrip(req, res, next) {
     try {
       const { id } = req.params;
       const updates = req.body;
 
-      const trip = await Trip.findByIdAndUpdate(
-        id,
-        updates,
-        { new: true, runValidators: true }
-      );
+      // Check authentication
+      if (!req.session.userId) {
+        return sendBadRequest(res, "Authentication required");
+      }
 
+      // Find trip and check ownership
+      const trip = await Trip.findById(id);
       if (!trip) {
         return sendNotFound(res, "Trip not found");
       }
 
-      sendSuccess(res, trip, "Trip updated successfully");
+      if (trip.hostId.toString() !== req.session.userId) {
+        return sendBadRequest(res, "You can only update your own trips");
+      }
+
+      const updatedTrip = await Trip.findByIdAndUpdate(
+        id,
+        updates,
+        { new: true, runValidators: true }
+      ).populate('hostId', 'name mobile userType');
+
+      sendSuccess(res, updatedTrip, "Trip updated successfully");
     } catch (error) {
       next(error);
     }
   }
 
   /**
-   * Delete (deactivate) trip by ID
+   * Delete (deactivate) trip by ID (HOST ONLY - OWN TRIPS)
    */
   static async deleteTrip(req, res, next) {
     try {
       const { id } = req.params;
       
-      const trip = await Trip.findByIdAndUpdate(
+      // Check authentication
+      if (!req.session.userId) {
+        return sendBadRequest(res, "Authentication required");
+      }
+
+      // Find trip and check ownership
+      const trip = await Trip.findById(id);
+      if (!trip) {
+        return sendNotFound(res, "Trip not found");
+      }
+
+      if (trip.hostId.toString() !== req.session.userId) {
+        return sendBadRequest(res, "You can only delete your own trips");
+      }
+
+      const deletedTrip = await Trip.findByIdAndUpdate(
         id,
         { isActive: false },
         { new: true }
       );
 
-      if (!trip) {
-        return sendNotFound(res, "Trip not found");
+      sendSuccess(res, null, "Trip deleted successfully");
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Get trips hosted by current user
+   */
+  static async getMyTrips(req, res, next) {
+    try {
+      // Check authentication
+      if (!req.session.userId) {
+        return sendBadRequest(res, "Authentication required");
       }
 
-      sendSuccess(res, null, "Trip deleted successfully");
+      const trips = await Trip.find({ 
+        hostId: req.session.userId,
+        isActive: true 
+      }).sort({ createdAt: -1 });
+
+      sendSuccess(res, trips, "Your trips retrieved successfully");
     } catch (error) {
       next(error);
     }

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext'; // ADD THIS
 import Navbar from './components/layout/Navbar';
 import HomePage from './pages/HomePage';
 import TripsListPage from './pages/trips/TripsListPage';
@@ -14,34 +15,36 @@ import TermsOfServicePage from './pages/legal/TermsOfServicePage';
 import CookiePolicyPage from './pages/legal/CookiePolicyPage';
 import ProfilePage from './pages/user/ProfilePage';
 import HostDashboard from './pages/host/HostDashboard,';
+import ProtectedRoute from './components/auth/ProtectedRoute';
 
 function App() {
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false);
-
   return (
-    <Router>
-      <div className="min-h-screen bg-gray-50">
-        <Navbar setIsLoginModalOpen={setIsLoginModalOpen} setIsSignUpModalOpen={setIsSignUpModalOpen} />
-        <main>
-          <Routes>
-            <Route path={APP_ROUTES.HOME} element={<HomePage isLoginModalOpen={isLoginModalOpen} setIsLoginModalOpen={setIsLoginModalOpen} isSignUpModalOpen={isSignUpModalOpen} setIsSignUpModalOpen={setIsSignUpModalOpen} />} />
-            <Route path={APP_ROUTES.TRIPS} element={<TripsListPage />} />
-            <Route path={APP_ROUTES.BOOKINGS} element={<BookingsListPage />} />
-            <Route path="/book/:tripId" element={<BookingFormPage />} />
-            <Route path="/bookings/:type/:id" element={<BookingDetailsPage />} />
-            <Route path={APP_ROUTES.HOST_NEW} element={<CreateTripPage />} />
-            <Route path={APP_ROUTES.HOST_TRIPS} element={<HostTripsListPage />} />
-            <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
-            <Route path="/terms-of-service" element={<TermsOfServicePage />} />
-            <Route path="/cookie-policy" element={<CookiePolicyPage />} />
-            <Route path="/profile" element={<ProfilePage />} />
-            <Route path={APP_ROUTES.HOST_DASHBOARD} element={<HostDashboard />} />
-            <Route path="*" element={<NotFoundPage />} />
-          </Routes>
-        </main>
-      </div>
-    </Router>
+    <AuthProvider> {/* WRAP WITH AUTH PROVIDER */}
+      <Router>
+        <div className="min-h-screen bg-gray-50">
+          <Navbar />
+          <main>
+            <Routes>
+              <Route path={APP_ROUTES.HOME} element={<HomePage />} />
+              
+              <Route path={APP_ROUTES.TRIPS} element={<TripsListPage />} />
+              <Route path={APP_ROUTES.BOOKINGS} element={<BookingsListPage />} />
+              <Route path="/book/:tripId" element={<ProtectedRoute requireAuth={true}><BookingFormPage /></ProtectedRoute>} />
+              <Route path="/bookings/:type/:id" element={<BookingDetailsPage />} />
+              <Route path={APP_ROUTES.HOST_NEW} element={<ProtectedRoute requireAuth={true} requireHost={true}><CreateTripPage /></ProtectedRoute>} />
+              <Route path="/profile" element={<ProfilePage />} />
+              <Route path={APP_ROUTES.HOST_TRIPS} element={<HostTripsListPage />} />
+              <Route path={APP_ROUTES.HOST_DASHBOARD} element={<HostDashboard />} />
+              
+              <Route path="/terms-of-service" element={<TermsOfServicePage />} />
+              <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+              <Route path="/cookie-policy" element={<CookiePolicyPage />} />
+              <Route path="*" element={<NotFoundPage />} />
+            </Routes>
+          </main>
+        </div>
+      </Router>
+    </AuthProvider>
   );
 }
 

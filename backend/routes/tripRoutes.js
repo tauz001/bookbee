@@ -22,4 +22,7 @@ router.put("/:id", TripController.updateTrip);
 // Delete (deactivate) trip
 router.delete("/:id", TripController.deleteTrip);
 
+// Get trips by host ID
+router.get("/host/my-trips", TripController.getMyTrips); // ADD THIS
+
 module.exports = router;

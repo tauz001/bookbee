@@ -1,11 +1,14 @@
-/**
- * Trip schema for hosted trips
- * Supports both seat booking and cab reservation
- */
 const mongoose = require("mongoose");
 
 const tripSchema = new mongoose.Schema(
   {
+    // Host reference - ADD THIS
+    hostId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: [true, "Host reference is required"]
+    },
+    
     // Route Information
     pickupCity: {
       type: String,
@@ -102,5 +105,6 @@ const tripSchema = new mongoose.Schema(
 tripSchema.index({ pickupCity: 1, dropCity: 1 });
 tripSchema.index({ date: 1 });
 tripSchema.index({ isActive: 1 });
+tripSchema.index({ hostId: 1 }); // ADD INDEX FOR HOST
 
 module.exports = mongoose.model("Trip", tripSchema);

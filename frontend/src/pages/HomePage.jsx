@@ -1,94 +1,436 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { APP_ROUTES } from '../config/constants';
+import { APP_ROUTES, USER_TYPES } from '../config/constants';
+import { useAuth } from '../contexts/AuthContext';
 import Button from '../components/common/Button';
 import Card from '../components/common/Card';
+import Navbar from '../components/layout/Navbar';
 
 // Import images
 import heroImage from '../assets/vehicleImg01.jpg';
 import logo from '../assets/BB-icon.png';
 import { HomePageService } from '../services/homePageService';
 
-const HomePage = ({ isLoginModalOpen, setIsLoginModalOpen, isSignUpModalOpen, setIsSignUpModalOpen }) => {
-  const navigate = useNavigate();
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
-const [modalMessage, setModalMessage] = useState('');
-const [modalType, setModalType] = useState('success'); // 'success' or 'error'
+// Move modal components outside to prevent recreation on every render
+const LoginModal = ({ 
+  isOpen, 
+  onClose, 
+  onSubmit, 
+  loginForm, 
+  setLoginForm, 
+  authLoading,
+  onSwitchToSignup 
+}) => {
+  if (!isOpen) return null;
 
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [submitting, setSubmitting] = useState(false);
+  return (
+    <div className="fixed inset-0 flex items-center justify-center z-50" style={{ background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(8px)' }}>
+      <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md border border-amber-100 relative">
+        <button
+          onClick={onClose}
+          className="absolute -top-4 -right-4 bg-white border border-gray-300 rounded-full p-2 shadow-lg text-gray-500 hover:text-amber-600 text-2xl flex items-center justify-center"
+          style={{ width: '40px', height: '40px' }}
+          aria-label="Close"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-6 h-6">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+        <h2 className="text-3xl font-bold mb-4 text-amber-600 text-center">Login</h2>
+        <form className="space-y-4" onSubmit={onSubmit}>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Mobile Number</label>
+            <input 
+              type="text" 
+              value={loginForm.mobile}
+              onChange={(e) => setLoginForm(prev => ({ ...prev, mobile: e.target.value }))}
+              className="w-full px-4 py-2 border border-amber-200 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent" 
+              placeholder="Enter your mobile number"
+              required 
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+            <input 
+              type="password" 
+              value={loginForm.password}
+              onChange={(e) => setLoginForm(prev => ({ ...prev, password: e.target.value }))}
+              className="w-full px-4 py-2 border border-amber-200 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent" 
+              placeholder="Enter your password"
+              required 
+            />
+          </div>
+          <button 
+            type="submit" 
+            disabled={authLoading}
+            className="w-full bg-amber-500 text-white py-2 rounded-lg hover:bg-amber-600 transition-colors font-semibold shadow disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          >
+            {authLoading ? (
+              <>
+                <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Logging in...
+              </>
+            ) : (
+              'Login'
+            )}
+          </button>
+        </form>
+        <div className="mt-4 text-center text-sm">
+          <span className="text-gray-600">Don't have an account? </span>
+          <button className="text-amber-600 hover:underline font-semibold" onClick={onSwitchToSignup}>Sign Up</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const SignUpModal = ({ 
+  isOpen, 
+  onClose, 
+  onSubmit, 
+  signupForm, 
+  setSignupForm, 
+  authLoading,
+  onSwitchToLogin 
+}) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 flex items-center justify-center z-50" style={{ background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(8px)' }}>
+      <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md border border-amber-100 relative">
+        <button
+          onClick={onClose}
+          className="absolute -top-4 -right-4 bg-white border border-gray-300 rounded-full p-2 shadow-lg text-gray-500 hover:text-amber-600 text-2xl flex items-center justify-center"
+          style={{ width: '40px', height: '40px' }}
+          aria-label="Close"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-6 h-6">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+        <h2 className="text-3xl font-bold mb-4 text-amber-600 text-center">Sign Up</h2>
+        <form className="space-y-4" onSubmit={onSubmit}>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+            <input 
+              type="text" 
+              value={signupForm.name}
+              onChange={(e) => setSignupForm(prev => ({ ...prev, name: e.target.value }))}
+              className="w-full px-4 py-2 border border-amber-200 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent" 
+              placeholder="Enter your full name"
+              required 
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Mobile Number</label>
+            <input 
+              type="text" 
+              value={signupForm.mobile}
+              onChange={(e) => setSignupForm(prev => ({ ...prev, mobile: e.target.value }))}
+              className="w-full px-4 py-2 border border-amber-200 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent" 
+              placeholder="Enter your mobile number"
+              required 
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">User Type</label>
+            <select 
+              value={signupForm.userType}
+              onChange={(e) => setSignupForm(prev => ({ ...prev, userType: e.target.value }))}
+              className="w-full px-4 py-2 border border-amber-200 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent"
+            >
+              <option value={USER_TYPES.COMMUTER}>Commuter (Book Rides)</option>
+              <option value={USER_TYPES.HOST}>Host (Offer Rides)</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+            <input 
+              type="password" 
+              value={signupForm.password}
+              onChange={(e) => setSignupForm(prev => ({ ...prev, password: e.target.value }))}
+              className="w-full px-4 py-2 border border-amber-200 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent" 
+              placeholder="Create a password (min 6 characters)"
+              required 
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+            <input 
+              type="password" 
+              value={signupForm.confirmPassword}
+              onChange={(e) => setSignupForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
+              className="w-full px-4 py-2 border border-amber-200 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent" 
+              placeholder="Confirm your password"
+              required 
+            />
+          </div>
+          <button 
+            type="submit" 
+            disabled={authLoading}
+            className="w-full bg-amber-500 text-white py-2 rounded-lg hover:bg-amber-600 transition-colors font-semibold shadow disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          >
+            {authLoading ? (
+              <>
+                <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Creating account...
+              </>
+            ) : (
+              'Sign Up'
+            )}
+          </button>
+        </form>
+        <div className="mt-4 text-center text-sm">
+          <span className="text-gray-600">Already have an account? </span>
+          <button className="text-amber-600 hover:underline font-semibold" onClick={onSwitchToLogin}>Login</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const SuccessModal = ({ isOpen, onClose, modalType, modalMessage }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 flex items-center justify-center z-50" style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(8px)' }}>
+      <div className="bg-white rounded-3xl shadow-2xl p-8 w-full max-w-md mx-4 border border-gray-100 relative animate-fadeIn">
+        <button
+          onClick={onClose}
+          className="absolute -top-3 -right-3 bg-white border-2 border-gray-200 rounded-full p-2 shadow-lg text-gray-400 hover:text-gray-600 hover:border-gray-300 transition-all duration-200 flex items-center justify-center"
+          style={{ width: '44px', height: '44px' }}
+          aria-label="Close"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-6 h-6">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+
+        <div className="text-center mb-6">
+          <div className={`inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 ${
+            modalType === 'success' 
+              ? 'bg-green-100 text-green-600' 
+              : 'bg-red-100 text-red-600'
+          }`}>
+            {modalType === 'success' ? (
+              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+              </svg>
+            ) : (
+              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            )}
+          </div>
+          
+          <h3 className={`text-2xl font-bold mb-2 ${
+            modalType === 'success' ? 'text-gray-900' : 'text-red-600'
+          }`}>
+            {modalType === 'success' ? 'Success!' : 'Oops! Something went wrong'}
+          </h3>
+          
+          <p className="text-gray-600 leading-relaxed">
+            {modalMessage}
+          </p>
+        </div>
+
+        <div className="flex gap-3">
+          <button
+            onClick={onClose}
+            className="flex-1 bg-amber-500 text-white py-3 px-6 rounded-xl hover:bg-amber-600 transition-colors font-semibold shadow-sm"
+          >
+            {modalType === 'success' ? 'Great!' : 'Close'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const HomePage = () => {
+  const navigate = useNavigate();
+  const { user, login, signup, logout, isAuthenticated, isHost } = useAuth();
   
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
+  const [modalType, setModalType] = useState('success');
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  
+  // Auth modal states
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false);
+  const [authLoading, setAuthLoading] = useState(false);
+
+  // Form states
+  const [loginForm, setLoginForm] = useState({
+    mobile: '',
+    password: ''
+  });
+
+  const [signupForm, setSignupForm] = useState({
+    name: '',
+    mobile: '',
+    password: '',
+    confirmPassword: '',
+    userType: USER_TYPES.COMMUTER
+  });
+
+  const [contactFormData, setContactFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    subject: '',
+    message: '',
+  });
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
-  // const handleContactFormSubmit = (e) => {
-  //   e.preventDefault();
-  //   // Handle contact form submission logic here
-  //   console.log('Contact form submitted');
-  // };
+  const handleLoginSubmit = async (e) => {
+    e.preventDefault();
+    setAuthLoading(true);
+
+    try {
+      await login({
+        mobile: loginForm.mobile,
+        password: loginForm.password
+      });
+      
+      setIsLoginModalOpen(false);
+      setLoginForm({ mobile: '', password: '' });
+      
+      // Show success message
+      setModalType('success');
+      setModalMessage('Welcome back! You have successfully logged in.');
+      setShowSuccessModal(true);
+      
+    } catch (error) {
+      setModalType('error');
+      setModalMessage(error.message || 'Login failed. Please try again.');
+      setShowSuccessModal(true);
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const handleSignupSubmit = async (e) => {
+    e.preventDefault();
+    setAuthLoading(true);
+
+    // Validate passwords match
+    if (signupForm.password !== signupForm.confirmPassword) {
+      setModalType('error');
+      setModalMessage('Passwords do not match');
+      setShowSuccessModal(true);
+      setAuthLoading(false);
+      return;
+    }
+
+    // Validate password length
+    if (signupForm.password.length < 6) {
+      setModalType('error');
+      setModalMessage('Password must be at least 6 characters long');
+      setShowSuccessModal(true);
+      setAuthLoading(false);
+      return;
+    }
+
+    try {
+      await signup({
+        name: signupForm.name,
+        mobile: signupForm.mobile,
+        password: signupForm.password,
+        userType: signupForm.userType
+      });
+      
+      setIsSignUpModalOpen(false);
+      setSignupForm({
+        name: '',
+        mobile: '',
+        password: '',
+        confirmPassword: '',
+        userType: USER_TYPES.COMMUTER
+      });
+      
+      // Show success message
+      setModalType('success');
+      setModalMessage('Account created successfully! Welcome to BookBee.');
+      setShowSuccessModal(true);
+      
+    } catch (error) {
+      setModalType('error');
+      setModalMessage(error.message || 'Signup failed. Please try again.');
+      setShowSuccessModal(true);
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      setModalType('success');
+      setModalMessage('You have been logged out successfully.');
+      setShowSuccessModal(true);
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
 
   const handleInputChange = (e) => {
-  const { name, value } = e.target;
-  
-  setContactFormData(prev => ({
-    ...prev,
-    [name]: value
-  }));
-};
+    const { name, value } = e.target;
+    
+    setContactFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
 
-  const [contactFormData, setContactFormData] = useState({
-      firstName: '',
-      lastName: '',
-      email: '',
-      subject: '',
-      message: '',
+  const handleSubmitContact = async (e) => {
+    e.preventDefault();
+    
+    try {
+      setSubmitting(true);
       
-    });
-const handleSubmitContact = async (e) => {
-  e.preventDefault();
-  
-  try {
-    setSubmitting(true);
-    
-    const contactData = {
-      firstName: contactFormData.firstName.trim(),
-      lastName: contactFormData.lastName.trim(),
-      email: contactFormData.email.trim(),
-      subject: contactFormData.subject.trim(),
-      message: contactFormData.message.trim(),
-    };
-    
-    console.log('Submitting contact form:', contactData);
-    
-    await HomePageService.submitContactForm(contactData);
-    
-    // Show success modal
-    setModalType('success');
-    setModalMessage('Thank you for your message! We\'ll get back to you within 24 hours.');
-    setShowSuccessModal(true);
-    
-    // Reset form
-    setContactFormData({
-      firstName: '',
-      lastName: '',
-      email: '',
-      subject: '',
-      message: '',
-    });
-    
-  } catch (err) {
-    console.error('Contact form error:', err);
-    // Show error modal
-    setModalType('error');
-    setModalMessage(`Sorry, there was an error sending your message: ${err.message}`);
-    setShowSuccessModal(true);
-  } finally {
-    setSubmitting(false);
-  }
-};
-
+      const contactData = {
+        firstName: contactFormData.firstName.trim(),
+        lastName: contactFormData.lastName.trim(),
+        email: contactFormData.email.trim(),
+        subject: contactFormData.subject.trim(),
+        message: contactFormData.message.trim(),
+      };
+      
+      await HomePageService.submitContactForm(contactData);
+      
+      setModalType('success');
+      setModalMessage('Thank you for your message! We\'ll get back to you within 24 hours.');
+      setShowSuccessModal(true);
+      
+      setContactFormData({
+        firstName: '',
+        lastName: '',
+        email: '',
+        subject: '',
+        message: '',
+      });
+      
+    } catch (err) {
+      console.error('Contact form error:', err);
+      setModalType('error');
+      setModalMessage(`Sorry, there was an error sending your message: ${err.message}`);
+      setShowSuccessModal(true);
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const stats = [
     { number: '10K+', label: 'Happy Travelers' },
@@ -135,291 +477,33 @@ const handleSubmitContact = async (e) => {
       title: 'Host Trips',
       description: 'Create trip listings and earn by sharing your ride',
       icon: '🎯',
-      action: () => navigate(APP_ROUTES.HOST_NEW)
+      action: isAuthenticated && isHost 
+        ? () => navigate(APP_ROUTES.HOST_NEW)
+        : () => {
+          if (!isAuthenticated) {
+            setModalType('error');
+            setModalMessage('Please sign up as a Host to create trips');
+            setShowSuccessModal(true);
+          } else {
+            setModalType('error');
+            setModalMessage('You need to be registered as a Host to create trips');
+            setShowSuccessModal(true);
+          }
+        }
     }
   ];
-
-  // Login Modal (Mobile Number + Password)
-  const LoginModal = () => (
-    <div className="fixed inset-0 flex items-center justify-center z-50" style={{ background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(8px)' }}>
-      <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md border border-amber-100 relative">
-        <button
-          onClick={() => setIsLoginModalOpen(false)}
-          className="absolute -top-4 -right-4 bg-white border border-gray-300 rounded-full p-2 shadow-lg text-gray-500 hover:text-amber-600 text-2xl flex items-center justify-center"
-          style={{ width: '40px', height: '40px' }}
-          aria-label="Close"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-6 h-6">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-        <h2 className="text-3xl font-bold mb-4 text-amber-600 text-center">Login</h2>
-        <form className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Mobile Number</label>
-            <input type="text" className="w-full px-4 py-2 border border-amber-200 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent" placeholder="Enter your mobile number" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-            <input type="password" className="w-full px-4 py-2 border border-amber-200 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent" placeholder="Enter your password" />
-          </div>
-          <button type="submit" className="w-full bg-amber-500 text-white py-2 rounded-lg hover:bg-amber-600 transition-colors font-semibold shadow">Login</button>
-        </form>
-        <div className="mt-4 text-center text-sm">
-          <span className="text-gray-600">Don't have an account? </span>
-          <button className="text-amber-600 hover:underline font-semibold" onClick={() => { setIsLoginModalOpen(false); setIsSignUpModalOpen(true); }}>Sign Up</button>
-        </div>
-      </div>
-    </div>
-  );
-
-  // Sign Up Modal (Mobile Number + Name + Password + Confirm Password)
-  const SignUpModal = () => (
-    <div className="fixed inset-0 flex items-center justify-center z-50" style={{ background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(8px)' }}>
-      <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md border border-amber-100 relative">
-        <button
-          onClick={() => setIsSignUpModalOpen(false)}
-          className="absolute -top-4 -right-4 bg-white border border-gray-300 rounded-full p-2 shadow-lg text-gray-500 hover:text-amber-600 text-2xl flex items-center justify-center"
-          style={{ width: '40px', height: '40px' }}
-          aria-label="Close"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-6 h-6">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-        <h2 className="text-3xl font-bold mb-4 text-amber-600 text-center">Sign Up</h2>
-        <form className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Mobile Number</label>
-            <input type="text" className="w-full px-4 py-2 border border-amber-200 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent" placeholder="Enter your mobile number" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
-            <input type="text" className="w-full px-4 py-2 border border-amber-200 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent" placeholder="Enter your name" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-            <input type="password" className="w-full px-4 py-2 border border-amber-200 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent" placeholder="Create a password" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
-            <input type="password" className="w-full px-4 py-2 border border-amber-200 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent" placeholder="Confirm your password" />
-          </div>
-          <button type="submit" className="w-full bg-amber-500 text-white py-2 rounded-lg hover:bg-amber-600 transition-colors font-semibold shadow">Sign Up</button>
-        </form>
-        <div className="mt-4 text-center text-sm">
-          <span className="text-gray-600">Already have an account? </span>
-          <button className="text-amber-600 hover:underline font-semibold" onClick={() => { setIsSignUpModalOpen(false); setIsLoginModalOpen(true); }}>Login</button>
-        </div>
-      </div>
-    </div>
-  );
-
-  const SuccessModal = () => (
-  <div className="fixed inset-0 flex items-center justify-center z-50" style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(8px)' }}>
-    <div className="bg-white rounded-3xl shadow-2xl p-8 w-full max-w-md mx-4 border border-gray-100 relative animate-fadeIn">
-      {/* Close button */}
-      <button
-        onClick={() => setShowSuccessModal(false)}
-        className="absolute -top-3 -right-3 bg-white border-2 border-gray-200 rounded-full p-2 shadow-lg text-gray-400 hover:text-gray-600 hover:border-gray-300 transition-all duration-200 flex items-center justify-center"
-        style={{ width: '44px', height: '44px' }}
-        aria-label="Close"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-6 h-6">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
-
-      {/* Icon */}
-      <div className="text-center mb-6">
-        <div className={`inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 ${
-          modalType === 'success' 
-            ? 'bg-green-100 text-green-600' 
-            : 'bg-red-100 text-red-600'
-        }`}>
-          {modalType === 'success' ? (
-            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-            </svg>
-          ) : (
-            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          )}
-        </div>
-        
-        <h3 className={`text-2xl font-bold mb-2 ${
-          modalType === 'success' ? 'text-gray-900' : 'text-red-600'
-        }`}>
-          {modalType === 'success' ? 'Message Sent!' : 'Oops! Something went wrong'}
-        </h3>
-        
-        <p className="text-gray-600 leading-relaxed">
-          {modalMessage}
-        </p>
-      </div>
-
-      {/* Action buttons */}
-      <div className="flex gap-3">
-        {modalType === 'success' ? (
-          <>
-            <button
-              onClick={() => setShowSuccessModal(false)}
-              className="flex-1 bg-amber-500 text-white py-3 px-6 rounded-xl hover:bg-amber-600 transition-colors font-semibold shadow-sm"
-            >
-              Great!
-            </button>
-            <button
-              onClick={() => {
-                setShowSuccessModal(false);
-                // Scroll to contact form for another message
-                document.querySelector('#contact-section')?.scrollIntoView({ behavior: 'smooth' });
-              }}
-              className="flex-1 border-2 border-amber-500 text-amber-600 py-3 px-6 rounded-xl hover:bg-amber-50 transition-colors font-semibold"
-            >
-              Send Another
-            </button>
-          </>
-        ) : (
-          <>
-            <button
-              onClick={() => setShowSuccessModal(false)}
-              className="flex-1 bg-gray-600 text-white py-3 px-6 rounded-xl hover:bg-gray-700 transition-colors font-semibold shadow-sm"
-            >
-              Close
-            </button>
-            <button
-              onClick={() => {
-                setShowSuccessModal(false);
-                // You could add retry logic here or just close
-              }}
-              className="flex-1 border-2 border-amber-500 text-amber-600 py-3 px-6 rounded-xl hover:bg-amber-50 transition-colors font-semibold"
-            >
-              Try Again
-            </button>
-          </>
-        )}
-      </div>
-    </div>
-  </div>
-);
 
   return (
     <div className="min-h-screen">
       {/* Mobile Navigation */}
-      <nav className="fixed top-0 left-0 right-0 bg-white z-50 md:hidden">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-16">
-            {/* Logo */}
-            <img src={logo} alt="BookBee Logo" className="h-8 w-auto" />
-            
-            {/* Auth Buttons - Visible on Desktop */}
-            <div className="hidden md:flex items-center space-x-4 mr-4">
-              <button className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-yellow-600 transition-colors">
-                Login
-              </button>
-              <button className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors">
-                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-              </button>
-            </div>
-
-            {/* Hamburger button */}
-            <button
-              onClick={toggleMenu}
-              className="p-2 rounded-md text-gray-700 hover:bg-gray-100 focus:outline-none"
-            >
-              <svg
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                {isMenuOpen ? (
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                ) : (
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
-                )}
-              </svg>
-            </button>
-          </div>
-
-          {/* Mobile menu */}
-          {isMenuOpen && (
-            <div className="bg-white border-t border-gray-200 py-2">
-              <div className="space-y-1 px-2 pt-2 pb-3">
-                <button
-                  onClick={() => {
-                    navigate(APP_ROUTES.TRIPS);
-                    setIsMenuOpen(false);
-                  }}
-                  className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
-                >
-                  Find Rides
-                </button>
-                <button
-                  onClick={() => {
-                    navigate(APP_ROUTES.HOST_NEW);
-                    setIsMenuOpen(false);
-                  }}
-                  className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
-                >
-                  Host a Trip
-                </button>
-                <button
-                  onClick={() => {
-                    navigate(APP_ROUTES.BOOKINGS);
-                    setIsMenuOpen(false);
-                  }}
-                  className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
-                >
-                  My Bookings
-                </button>
-                <hr className="my-2" />
-                <a href="#" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
-                  Help Center
-                </a>
-                <a href="#" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
-                  Contact Us
-                </a>
-                <hr className="my-2" />
-                <button
-                  onClick={() => {
-                    setIsLoginModalOpen(true);
-                    setIsMenuOpen(false);
-                  }}
-                  className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
-                >
-                  Login
-                </button>
-                <button
-                  onClick={() => {
-                    // Add profile navigation logic here
-                    setIsMenuOpen(false);
-                  }}
-                  className="flex items-center w-full px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
-                >
-                  <span>Profile</span>
-                  <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-      </nav>
+      <Navbar 
+  user={user}
+  isAuthenticated={isAuthenticated}
+  isHost={isHost}
+  onLogin={() => setIsLoginModalOpen(true)}
+  onSignUp={() => setIsSignUpModalOpen(true)}
+  onLogout={handleLogout}
+/>
 
       {/* Hero Section */}
       <section className="relative h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 to-amber-100/50 overflow-hidden pt-16 md:pt-0">
@@ -444,14 +528,34 @@ const handleSubmitContact = async (e) => {
                   Find a Ride
                 </Button>
                 <Button
-                  onClick={() => navigate(APP_ROUTES.HOST_NEW)}
+                  onClick={() => {
+                    if (isAuthenticated && isHost) {
+                      navigate(APP_ROUTES.HOST_NEW);
+                    } else if (!isAuthenticated) {
+                      setIsSignUpModalOpen(true);
+                    } else {
+                      setModalType('error');
+                      setModalMessage('You need to be registered as a Host to create trips');
+                      setShowSuccessModal(true);
+                    }
+                  }}
                   variant="outline"
                   size="lg"
-                  className="border-2 border-gray-900 text-gray-900 hover:bg-gray-900 hover:text-gray-900 px-8 sm:px-12 py-4 text-base sm:text-lg transition-all duration-300"
+                  className="border-2 border-gray-900 text-gray-900 hover:bg-gray-900 hover:text-white px-8 sm:px-12 py-4 text-base sm:text-lg transition-all duration-300"
                 >
-                  Host a Trip
+                  {isAuthenticated && isHost ? 'Host a Trip' : 'Become a Host'}
                 </Button>
               </div>
+              
+              {/* Auth Status Display */}
+              {isAuthenticated && (
+                <div className="mt-6 p-4 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm inline-block">
+                  <p className="text-sm text-gray-600">
+                    Welcome back, <span className="font-semibold text-amber-600">{user?.name}</span>! 
+                    You're logged in as a <span className="font-semibold capitalize">{user?.userType}</span>.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -556,99 +660,6 @@ const handleSubmitContact = async (e) => {
             </div>
           </div>
         </div>
-
-        <style jsx>{`
-           @keyframes marquee {
-    0% {
-      transform: translateX(0);
-    }
-    100% {
-      transform: translateX(-50%);
-    }
-  }
-  .animate-marquee {
-    animation: marquee 20s linear infinite;
-    &:hover {
-      animation-play-state: paused;
-    }
-  }
-  
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: scale(0.9) translateY(-20px);
-    }
-    to {
-      opacity: 1;
-      transform: scale(1) translateY(0);
-    }
-  }
-  .animate-fadeIn {
-    animation: fadeIn 0.3s ease-out;
-  }
-  
-  @keyframes pulse {
-    0%, 100% {
-      transform: scale(1);
-    }
-    50% {
-      transform: scale(1.05);
-    }
-  }
-  .animate-pulse-subtle {
-    animation: pulse 2s infinite;
-  }
-`}</style>
-
-// OR if you want to keep them separate, create TWO style blocks:
-
-{/* Existing marquee styles */}
-<style jsx>{`
-  @keyframes marquee {
-    0% {
-      transform: translateX(0);
-    }
-    100% {
-      transform: translateX(-50%);
-    }
-  }
-  .animate-marquee {
-    animation: marquee 20s linear infinite;
-    &:hover {
-      animation-play-state: paused;
-    }
-  }
-`}</style>
-
-{/* New modal styles */}
-<style jsx>{`
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: scale(0.9) translateY(-20px);
-    }
-    to {
-      opacity: 1;
-      transform: scale(1) translateY(0);
-    }
-  }
-  .animate-fadeIn {
-    animation: fadeIn 0.3s ease-out;
-  }
-  
-  @keyframes pulse {
-    0%, 100% {
-      transform: scale(1);
-    }
-    50% {
-      transform: scale(1.05);
-    }
-  }
-  .animate-pulse-subtle {
-    animation: pulse 2s infinite;
-  }
-        `}</style>
-        
       </section>
 
       {/* CTA Section */}
@@ -670,12 +681,18 @@ const handleSubmitContact = async (e) => {
                 Browse Available Trips
               </Button>
               <Button
-                onClick={() => navigate(APP_ROUTES.BOOKINGS)}
+                onClick={() => {
+                  if (isAuthenticated) {
+                    navigate(APP_ROUTES.BOOKINGS);
+                  } else {
+                    setIsLoginModalOpen(true);
+                  }
+                }}
                 variant="outline"
                 size="lg"
                 className="px-12 py-4 text-lg border-2 border-amber-500 text-amber-500 hover:bg-amber-50"
               >
-                View My Bookings
+                {isAuthenticated ? 'View My Bookings' : 'Login to View Bookings'}
               </Button>
             </div>
           </div>
@@ -683,8 +700,8 @@ const handleSubmitContact = async (e) => {
       </section>
 
       {/* Contact Section */}
-      {showSuccessModal && <SuccessModal />}
-<section id="contact-section" className="min-h-screen bg-gradient-to-br from-amber-50 to-amber-100/50 py-16">        <div className="container mx-auto px-4">
+      <section id="contact-section" className="min-h-screen bg-gradient-to-br from-amber-50 to-amber-100/50 py-16">
+        <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-12">
               <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4 tracking-tight">
@@ -748,119 +765,100 @@ const handleSubmitContact = async (e) => {
               <div className="bg-white rounded-2xl p-8 shadow-sm">
                 <h3 className="text-2xl font-bold text-gray-900 mb-6">Send us a Message</h3>
                 <form className="space-y-6" onSubmit={handleSubmitContact}>
-  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-    <div>
-      <label className="block text-sm font-medium text-gray-700 mb-2">
-        First Name
-      </label>
-      <input
-        name="firstName"          // ADD THIS
-        onChange={handleInputChange}
-        value={contactFormData.firstName}
-        type="text"
-        required                  // ADD THIS
-        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent"
-        placeholder="John"
-      />
-    </div>
-    <div>
-      <label className="block text-sm font-medium text-gray-700 mb-2">
-        Last Name
-      </label>
-      <input
-        name="lastName"           // ADD THIS
-        onChange={handleInputChange}
-        value={contactFormData.lastName}
-        type="text"
-        required                  // ADD THIS
-        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent"
-        placeholder="Doe"
-      />
-    </div>
-  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">First Name</label>
+                      <input
+                        name="firstName"
+                        onChange={handleInputChange}
+                        value={contactFormData.firstName}
+                        type="text"
+                        required
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent"
+                        placeholder="John"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
+                      <input
+                        name="lastName"
+                        onChange={handleInputChange}
+                        value={contactFormData.lastName}
+                        type="text"
+                        required
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent"
+                        placeholder="Doe"
+                      />
+                    </div>
+                  </div>
 
-  <div>
-    <label className="block text-sm font-medium text-gray-700 mb-2">
-      Email
-    </label>
-    <input
-      name="email"               // ADD THIS
-      onChange={handleInputChange}
-      value={contactFormData.email}
-      type="email"
-      required                   // ADD THIS
-      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent"
-      placeholder="john@example.com"
-    />
-  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                    <input
+                      name="email"
+                      onChange={handleInputChange}
+                      value={contactFormData.email}
+                      type="email"
+                      required
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent"
+                      placeholder="john@example.com"
+                    />
+                  </div>
 
-  <div>
-    <label className="block text-sm font-medium text-gray-700 mb-2">
-      Subject
-    </label>
-    <input
-      name="subject"             // ADD THIS
-      onChange={handleInputChange}
-      value={contactFormData.subject}
-      type="text"
-      required                   // ADD THIS
-      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent"
-      placeholder="How can we help?"
-    />
-  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Subject</label>
+                    <input
+                      name="subject"
+                      onChange={handleInputChange}
+                      value={contactFormData.subject}
+                      type="text"
+                      required
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent"
+                      placeholder="How can we help?"
+                    />
+                  </div>
 
-  <div>
-    <label className="block text-sm font-medium text-gray-700 mb-2">
-      Message
-    </label>
-    <textarea
-      name="message"             // ADD THIS
-      onChange={handleInputChange}
-      value={contactFormData.message}
-      rows="4"
-      required                   // ADD THIS
-      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent"
-      placeholder="Your message..."
-    ></textarea>
-  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Message</label>
+                    <textarea
+                      name="message"
+                      onChange={handleInputChange}
+                      value={contactFormData.message}
+                      rows="4"
+                      required
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent"
+                      placeholder="Your message..."
+                    ></textarea>
+                  </div>
 
-  <Button
-  type="submit"
-  className="w-full bg-amber-500 text-white hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-  disabled={submitting}
->
-  {submitting ? (
-    <>
-      <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-      </svg>
-      Sending...
-    </>
-  ) : (
-    'Send Message'
-  )}
-</Button>
-</form>
+                  <Button
+                    type="submit"
+                    className="w-full bg-amber-500 text-white hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    disabled={submitting}
+                  >
+                    {submitting ? (
+                      <>
+                        <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Sending...
+                      </>
+                    ) : (
+                      'Send Message'
+                    )}
+                  </Button>
+                </form>
               </div>
             </div>
           </div>
         </div>
-        
-        <style jsx>{`
-      
-    `}</style>
-
       </section>
-
-      {/* Login Modal */}
-      {isLoginModalOpen && <LoginModal />}
-      {isSignUpModalOpen && <SignUpModal />}
 
       {/* Footer */}
       <footer className="bg-gray-900 text-gray-300">
         <div className="container mx-auto px-4 py-16">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-12">
             <div>
               <img src={logo} alt="BookBee Logo" className="h-12 w-auto mb-4" />
               <p className="text-sm leading-relaxed">
@@ -871,8 +869,20 @@ const handleSubmitContact = async (e) => {
               <h3 className="font-semibold text-white mb-4">Quick Links</h3>
               <ul className="space-y-2">
                 <li><button onClick={() => navigate(APP_ROUTES.TRIPS)} className="hover:text-yellow-400">Find Rides</button></li>
-                <li><button onClick={() => navigate(APP_ROUTES.HOST_NEW)} className="hover:text-yellow-400">Host a Trip</button></li>
-                <li><button onClick={() => navigate(APP_ROUTES.BOOKINGS)} className="hover:text-yellow-400">My Bookings</button></li>
+                <li><button onClick={() => {
+                  if (isAuthenticated && isHost) {
+                    navigate(APP_ROUTES.HOST_NEW);
+                  } else {
+                    setIsSignUpModalOpen(true);
+                  }
+                }} className="hover:text-yellow-400">Host a Trip</button></li>
+                <li><button onClick={() => {
+                  if (isAuthenticated) {
+                    navigate(APP_ROUTES.BOOKINGS);
+                  } else {
+                    setIsLoginModalOpen(true);
+                  }
+                }} className="hover:text-yellow-400">My Bookings</button></li>
               </ul>
             </div>
             <div>
@@ -880,7 +890,7 @@ const handleSubmitContact = async (e) => {
               <ul className="space-y-2">
                 <li><a href="#" className="hover:text-yellow-400">Help Center</a></li>
                 <li><a href="#" className="hover:text-yellow-400">Safety Guidelines</a></li>
-                <li><a href="#" className="hover:text-yellow-400">Contact Us</a></li>
+                <li><a href="#contact-section" className="hover:text-yellow-400">Contact Us</a></li>
               </ul>
             </div>
             <div>
@@ -905,6 +915,67 @@ const handleSubmitContact = async (e) => {
           </div>
         </div>
       </footer>
+
+      {/* Modals */}
+      <LoginModal
+        isOpen={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
+        onSubmit={handleLoginSubmit}
+        loginForm={loginForm}
+        setLoginForm={setLoginForm}
+        authLoading={authLoading}
+        onSwitchToSignup={() => {
+          setIsLoginModalOpen(false);
+          setIsSignUpModalOpen(true);
+        }}
+      />
+
+      <SignUpModal
+        isOpen={isSignUpModalOpen}
+        onClose={() => setIsSignUpModalOpen(false)}
+        onSubmit={handleSignupSubmit}
+        signupForm={signupForm}
+        setSignupForm={setSignupForm}
+        authLoading={authLoading}
+        onSwitchToLogin={() => {
+          setIsSignUpModalOpen(false);
+          setIsLoginModalOpen(true);
+        }}
+      />
+
+      <SuccessModal
+        isOpen={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+        modalType={modalType}
+        modalMessage={modalMessage}
+      />
+
+      {/* Styles */}
+      <style jsx>{`
+        @keyframes marquee {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        .animate-marquee {
+          animation: marquee 20s linear infinite;
+        }
+        .animate-marquee:hover {
+          animation-play-state: paused;
+        }
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: scale(0.9) translateY(-20px);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+          }
+        }
+        .animate-fadeIn {
+          animation: fadeIn 0.3s ease-out;
+        }
+      `}</style>
     </div>
   );
 };
