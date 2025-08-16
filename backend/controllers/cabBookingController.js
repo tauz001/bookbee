@@ -47,35 +47,48 @@ class CabBookingController {
    * Get all cab bookings
    */
   static async getAllCabBookings(req, res, next) {
-    try {
-      const bookings = await CabBooking.find()
-        .populate('tripId')
-        .sort({ createdAt: -1 });
+  try {
+    const bookings = await CabBooking.find()
+      .populate({
+        path: 'tripId',
+        populate: {
+          path: 'hostId',
+          select: 'name mobile userType' // Add host info
+        }
+      })
+      .sort({ createdAt: -1 });
 
-      sendSuccess(res, bookings, "Cab bookings retrieved successfully");
-    } catch (error) {
-      next(error);
-    }
+    sendSuccess(res, bookings, "Cab bookings retrieved successfully");
+  } catch (error) {
+    next(error);
   }
+}
 
   /**
    * Get cab booking by ID
    */
   static async getCabBookingById(req, res, next) {
-    try {
-      const { id } = req.params;
-      
-      const booking = await CabBooking.findById(id).populate('tripId');
-      
-      if (!booking) {
-        return sendNotFound(res, "Cab booking not found");
-      }
-
-      sendSuccess(res, booking, "Cab booking retrieved successfully");
-    } catch (error) {
-      next(error);
+  try {
+    const { id } = req.params;
+    
+    const booking = await CabBooking.findById(id)
+      .populate({
+        path: 'tripId',
+        populate: {
+          path: 'hostId',
+          select: 'name mobile userType' // Add host info
+        }
+      });
+    
+    if (!booking) {
+      return sendNotFound(res, "Cab booking not found");
     }
+
+    sendSuccess(res, booking, "Cab booking retrieved successfully");
+  } catch (error) {
+    next(error);
   }
+}
 
   /**
    * Update cab booking status

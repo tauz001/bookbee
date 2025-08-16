@@ -4,7 +4,6 @@ import { APP_ROUTES, USER_TYPES } from '../config/constants';
 import { useAuth } from '../contexts/AuthContext';
 import Button from '../components/common/Button';
 import Card from '../components/common/Card';
-import Navbar from '../components/layout/Navbar';
 
 // Import images
 import heroImage from '../assets/vehicleImg01.jpg';
@@ -496,14 +495,7 @@ const HomePage = () => {
   return (
     <div className="min-h-screen">
       {/* Mobile Navigation */}
-      <Navbar 
-  user={user}
-  isAuthenticated={isAuthenticated}
-  isHost={isHost}
-  onLogin={() => setIsLoginModalOpen(true)}
-  onSignUp={() => setIsSignUpModalOpen(true)}
-  onLogout={handleLogout}
-/>
+      
 
       {/* Hero Section */}
       <section className="relative h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 to-amber-100/50 overflow-hidden pt-16 md:pt-0">

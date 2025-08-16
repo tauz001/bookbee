@@ -79,6 +79,7 @@ const BookingDetailsPage = () => {
   }
 
   const trip = booking.tripId;
+  const hostInfo = booking?.tripId?.hostId;
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -254,7 +255,7 @@ const BookingDetailsPage = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-gray-600">Listed by</p>
-                  <p className="font-semibold text-gray-900">@{trip?.hostId || 'Unknown Host'}</p>
+                  <p className="font-semibold text-gray-900">@{hostInfo.name?.toLowerCase()}</p>
                 </div>
                 <div className="text-right">
                   <div className="flex items-center text-yellow-500">

@@ -2,11 +2,21 @@ const mongoose = require("mongoose");
 
 const tripSchema = new mongoose.Schema(
   {
-    // Host reference - ADD THIS
+    // Host reference 
     hostId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: [true, "Host reference is required"]
+    },
+    // hostName: {
+    //   type: mongoose.Schema.Types.String.,
+    //   ref: "User",
+    //   required: [true, "Host reference is required"]
+    // },
+    hostName: {
+      type: String,
+      required: [true, "Host name is required"],
+      trim: true
     },
     
     // Route Information

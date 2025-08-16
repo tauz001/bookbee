@@ -49,7 +49,8 @@ class TripController {
           type,
           seats
         },
-        hostId: req.session.userId // ADD HOST REFERENCE
+        hostId: req.session.userId,
+        // hostName: req.session.name 
       });
 
       const savedTrip = await trip.save();

@@ -1,49 +1,120 @@
-/**
- * Trip-related API calls
- */
-import ApiService from '../utils/apiService';
-import { API_CONFIG } from '../config/constants';
+const API_BASE_URL = "http://localhost:3000/api";
+
+const fetchWithConfig = (url, options = {}) => {
+  return fetch(url, {
+    ...options,
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+      ...options.headers
+    }
+  });
+};
 
 export class TripService {
-  
-  /**
-   * Create a new hosted trip
-   */
   static async createTrip(tripData) {
-    const response = await ApiService.post(API_CONFIG.ENDPOINTS.TRIPS, tripData);
-    return response.data;
+    try {
+      console.log('🔄 Creating trip...');
+      
+      const response = await fetchWithConfig(`${API_BASE_URL}/trips`, {
+        method: "POST",
+        body: JSON.stringify(tripData)
+      });
+
+      if (!response.ok) {
+        let errorMessage = `HTTP error! status: ${response.status}`;
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorMessage;
+        } catch {
+          errorMessage = response.statusText || errorMessage;
+        }
+        throw new Error(errorMessage);
+      }
+
+      const result = await response.json();
+      console.log('✅ Trip created successfully');
+      return result.data;
+    } catch (error) {
+      console.error('❌ Error creating trip:', error);
+      throw error;
+    }
   }
 
-  /**
-   * Get all available trips
-   */
   static async getAllTrips() {
-    const response = await ApiService.get(API_CONFIG.ENDPOINTS.TRIPS);
-    return response.data;
+    try {
+      const response = await fetchWithConfig(`${API_BASE_URL}/trips`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const result = await response.json();
+      return result.data;
+    } catch (error) {
+      console.error('❌ Error fetching trips:', error);
+      throw error;
+    }
   }
 
-  /**
-   * Get trip by ID
-   */
   static async getTripById(tripId) {
-    const response = await ApiService.get(`${API_CONFIG.ENDPOINTS.TRIPS}/${tripId}`);
-    return response.data;
+    try {
+      const response = await fetchWithConfig(`${API_BASE_URL}/trips/${tripId}`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const result = await response.json();
+      return result.data;
+    } catch (error) {
+      console.error('❌ Error fetching trip:', error);
+      throw error;
+    }
   }
 
-  /**
-   * Update trip
-   */
   static async updateTrip(tripId, tripData) {
-    const response = await ApiService.put(`${API_CONFIG.ENDPOINTS.TRIPS}/${tripId}`, tripData);
-    return response.data;
+    try {
+      const response = await fetchWithConfig(`${API_BASE_URL}/trips/${tripId}`, {
+        method: "PUT",
+        body: JSON.stringify(tripData)
+      });
+      
+      if (!response.ok) {
+        let errorMessage = `HTTP error! status: ${response.status}`;
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorMessage;
+        } catch {
+          errorMessage = response.statusText || errorMessage;
+        }
+        throw new Error(errorMessage);
+      }
+      
+      const result = await response.json();
+      return result.data;
+    } catch (error) {
+      console.error('❌ Error updating trip:', error);
+      throw error;
+    }
   }
 
-  /**
-   * Delete trip
-   */
   static async deleteTrip(tripId) {
-    const response = await ApiService.delete(`${API_CONFIG.ENDPOINTS.TRIPS}/${tripId}`);
-    return response.data;
+    try {
+      const response = await fetchWithConfig(`${API_BASE_URL}/trips/${tripId}`, {
+        method: "DELETE"
+      });
+      
+      if (!response.ok) {
+        let errorMessage = `HTTP error! status: ${response.status}`;
+        throw new Error(errorMessage);
+      }
+      
+      const result = await response.json();
+      return result.data;
+    } catch (error) {
+      console.error('❌ Error deleting trip:', error);
+      throw error;
+    }
   }
 }
-

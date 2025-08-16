@@ -60,35 +60,48 @@ class SeatBookingController {
    * Get all seat bookings
    */
   static async getAllSeatBookings(req, res, next) {
-    try {
-      const bookings = await SeatBooking.find()
-        .populate('tripId')
-        .sort({ createdAt: -1 });
+  try {
+    const bookings = await SeatBooking.find()
+      .populate({
+        path: 'tripId',
+        populate: {
+          path: 'hostId',
+          select: 'name mobile userType' // Add host info
+        }
+      })
+      .sort({ createdAt: -1 });
 
-      sendSuccess(res, bookings, "Seat bookings retrieved successfully");
-    } catch (error) {
-      next(error);
-    }
+    sendSuccess(res, bookings, "Seat bookings retrieved successfully");
+  } catch (error) {
+    next(error);
   }
+}
 
   /**
    * Get seat booking by ID
    */
   static async getSeatBookingById(req, res, next) {
-    try {
-      const { id } = req.params;
-      
-      const booking = await SeatBooking.findById(id).populate('tripId');
-      
-      if (!booking) {
-        return sendNotFound(res, "Seat booking not found");
-      }
-
-      sendSuccess(res, booking, "Seat booking retrieved successfully");
-    } catch (error) {
-      next(error);
+  try {
+    const { id } = req.params;
+    
+    const booking = await SeatBooking.findById(id)
+      .populate({
+        path: 'tripId',
+        populate: {
+          path: 'hostId',
+          select: 'name mobile userType' // Add host info
+        }
+      });
+    
+    if (!booking) {
+      return sendNotFound(res, "Seat booking not found");
     }
+
+    sendSuccess(res, booking, "Seat booking retrieved successfully");
+  } catch (error) {
+    next(error);
   }
+}
 
   /**
    * Update seat booking status
