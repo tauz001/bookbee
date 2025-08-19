@@ -55,8 +55,8 @@ const HostDashboard = () => {
     // Fetch all bookings
     console.log('🔄 Fetching all bookings...');
     const [seatResponse, cabResponse] = await Promise.all([
-      fetch(`${API_BASE_URL}/bookings/seats`, { credentials: 'include' }),
-      fetch(`${API_BASE_URL}/bookings/cabs`, { credentials: 'include' })
+      fetch(`${API_BASE_URL}/bookings/host/seats`, { credentials: 'include' }),
+      fetch(`${API_BASE_URL}/bookings/host/cabs`, { credentials: 'include' })
     ]);
 
     console.log('📊 Seat bookings response status:', seatResponse.status);
