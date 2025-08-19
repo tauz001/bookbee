@@ -14,7 +14,7 @@ import PrivacyPolicyPage from './pages/legal/PrivacyPolicyPage';
 import TermsOfServicePage from './pages/legal/TermsOfServicePage';
 import CookiePolicyPage from './pages/legal/CookiePolicyPage';
 import ProfilePage from './pages/user/ProfilePage';
-import HostDashboard from './pages/host/HostDashboard,';
+import HostDashboard from './pages/host/HostDashboard';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 
 function App() {

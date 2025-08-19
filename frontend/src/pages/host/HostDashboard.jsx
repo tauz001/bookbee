@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, Users, Car, Clock, MapPin, Filter, Search, Eye, CheckCircle, XCircle } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 
 const HostDashboard = () => {
+    const { user, isAuthenticated, isHost } = useAuth();
   const [seatBookings, setSeatBookings] = useState([]);
   const [cabBookings, setCabBookings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -18,36 +20,117 @@ const HostDashboard = () => {
   // Fetch bookings from API
   useEffect(() => {
     const fetchBookings = async () => {
-      setLoading(true);
-      setError(null);
-      
-      try {
-        // Fetch seat bookings
-        const seatResponse = await fetch(`${API_BASE_URL}/bookings/seats`);
-        if (!seatResponse.ok) {
-          throw new Error(`Failed to fetch seat bookings: ${seatResponse.status}`);
-        }
-        const seatResult = await seatResponse.json();
+  setLoading(true);
+  setError(null);
+  
+  try {
+    console.log('🔄 Starting to fetch bookings for host dashboard...');
+    
+    // First, get the host's trips
+    const myTripsResponse = await fetch(`${API_BASE_URL}/trips/my-trips`, {
+      credentials: 'include'
+    });
+    
+    console.log('📋 My trips response status:', myTripsResponse.status);
+    
+    if (!myTripsResponse.ok) {
+      const errorText = await myTripsResponse.text();
+      console.error('❌ My trips error:', errorText);
+      throw new Error(`Failed to fetch your trips: ${myTripsResponse.status}`);
+    }
+    
+    const myTripsResult = await myTripsResponse.json();
+    console.log('✅ My trips data:', myTripsResult);
+    
+    const myTripIds = myTripsResult.data.map(trip => trip._id);
+    console.log('🔑 My trip IDs:', myTripIds);
+    
+    if (myTripIds.length === 0) {
+      console.log('ℹ️ No trips found for host, setting empty bookings');
+      setSeatBookings([]);
+      setCabBookings([]);
+      return;
+    }
+    
+    // Fetch all bookings
+    console.log('🔄 Fetching all bookings...');
+    const [seatResponse, cabResponse] = await Promise.all([
+      fetch(`${API_BASE_URL}/bookings/seats`, { credentials: 'include' }),
+      fetch(`${API_BASE_URL}/bookings/cabs`, { credentials: 'include' })
+    ]);
 
-        // Fetch cab bookings
-        const cabResponse = await fetch(`${API_BASE_URL}/bookings/cabs`);
-        if (!cabResponse.ok) {
-          throw new Error(`Failed to fetch cab bookings: ${cabResponse.status}`);
-        }
-        const cabResult = await cabResponse.json();
+    console.log('📊 Seat bookings response status:', seatResponse.status);
+    console.log('🚗 Cab bookings response status:', cabResponse.status);
 
-        setSeatBookings(seatResult.data || []);
-        setCabBookings(cabResult.data || []);
-      } catch (error) {
-        console.error('Error fetching bookings:', error);
-        setError(error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+    if (!seatResponse.ok || !cabResponse.ok) {
+      throw new Error('Failed to fetch bookings');
+    }
+
+    const [seatResult, cabResult] = await Promise.all([
+      seatResponse.json(),
+      cabResponse.json()
+    ]);
+
+    console.log('📊 All seat bookings:', seatResult.data);
+    console.log('🚗 All cab bookings:', cabResult.data);
+
+    // Filter bookings to only include ones for host's trips
+    const hostSeatBookings = (seatResult.data || []).filter(booking => {
+      console.log('🔍 Checking seat booking:', booking._id, 'tripId:', booking.tripId?._id);
+      return booking.tripId && myTripIds.includes(booking.tripId._id);
+    });
+    
+    const hostCabBookings = (cabResult.data || []).filter(booking => {
+      console.log('🔍 Checking cab booking:', booking._id, 'tripId:', booking.tripId?._id);
+      return booking.tripId && myTripIds.includes(booking.tripId._id);
+    });
+
+    console.log('✅ Filtered seat bookings for host:', hostSeatBookings);
+    console.log('✅ Filtered cab bookings for host:', hostCabBookings);
+
+    setSeatBookings(hostSeatBookings);
+    setCabBookings(hostCabBookings);
+  } catch (error) {
+    console.error('❌ Error fetching bookings:', error);
+    setError(error.message);
+  } finally {
+    setLoading(false);
+  }
+};
 
     fetchBookings();
   }, []);
+
+
+  //tem func
+  // Add this useEffect to check raw data
+useEffect(() => {
+  const checkDatabase = async () => {
+    try {
+      // Check what's actually in the database
+      const response = await fetch(`${API_BASE_URL}/bookings/seats`, { 
+        credentials: 'include' 
+      });
+      const result = await response.json();
+      
+      console.log('🗃️ Raw database seat bookings:');
+      result.data?.forEach((booking, index) => {
+        console.log(`📋 Booking ${index + 1}:`, {
+          id: booking._id,
+          tripId: booking.tripId,
+          userId: booking.userId,
+          pickupCity: booking.pickupCity,
+          createdAt: booking.createdAt
+        });
+      });
+      
+    } catch (error) {
+      console.error('Database check error:', error);
+    }
+  };
+  
+  checkDatabase();
+}, []);
 
   // Update booking status
   const updateBookingStatus = async (bookingId, newStatus, bookingType) => {
@@ -56,12 +139,13 @@ const HostDashboard = () => {
     try {
       const endpoint = bookingType === 'seat' ? 'seats' : 'cabs';
       const response = await fetch(`${API_BASE_URL}/bookings/${endpoint}/${bookingId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ status: newStatus }),
-      });
+  method: 'PUT',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  credentials: 'include', // ADD THIS LINE
+  body: JSON.stringify({ status: newStatus }),
+});
 
       if (!response.ok) {
         throw new Error(`Failed to update booking status: ${response.status}`);
@@ -94,6 +178,13 @@ const HostDashboard = () => {
       setUpdating(null);
     }
   };
+
+  // Add this useEffect to debug auth
+useEffect(() => {
+  console.log('🔐 Current user from context:', user);
+  console.log('🏠 Is host?', isHost);
+  console.log('🔓 Is authenticated?', isAuthenticated);
+}, [user, isHost, isAuthenticated]);
 
   // Filter functions
   const getThisWeekBookings = (bookings) => {
@@ -175,18 +266,23 @@ const HostDashboard = () => {
 
   // Generate initials from pickup city and drop city for now (until auth is implemented)
   const generateInitials = (booking) => {
-    if (booking.pickupCity && booking.dropCity) {
-      return booking.pickupCity.charAt(0).toUpperCase() + booking.dropCity.charAt(0).toUpperCase();
-    } else if (booking.pickupCity) {
-      return booking.pickupCity.charAt(0).toUpperCase() + booking.pickupCity.charAt(1).toUpperCase();
-    }
-    return 'UN'; // Unknown
-  };
+  if (booking.userId?.name) {
+    const names = booking.userId.name.split(' ');
+    return names.length > 1 
+      ? names[0].charAt(0).toUpperCase() + names[1].charAt(0).toUpperCase()
+      : names[0].charAt(0).toUpperCase() + names[0].charAt(1).toUpperCase();
+  }
+  return 'UN'; // Unknown
+};
 
   // Generate display name for now (until auth is implemented)
   const getDisplayName = (booking) => {
-    return `User from ${booking.pickupCity}`;
-  };
+  return booking.userId?.name || `User from ${booking.pickupCity}`;
+};
+
+const getContactInfo = (booking) => {
+  return booking.userId?.mobile || 'Contact info not available';
+};
 
   const filteredSeatBookings = getFilteredBookings(seatBookings);
   const filteredCabBookings = getFilteredBookings(cabBookings);
@@ -363,6 +459,9 @@ const HostDashboard = () => {
                         <p className="text-gray-500 text-sm">
                           Booked on {formatDate(booking.createdAt)}
                         </p>
+                        <p className="text-gray-500 text-sm">
+    📞 {getContactInfo(booking)}
+  </p>
                       </div>
                     </div>
                     {getStatusBadge(booking.status)}
@@ -497,6 +596,9 @@ const HostDashboard = () => {
                         <p className="text-gray-500 text-sm">
                           Requested on {formatDate(booking.createdAt)}
                         </p>
+                        <p className="text-gray-500 text-sm">
+    📞 {getContactInfo(booking)}
+  </p>
                       </div>
                     </div>
                     {getStatusBadge(booking.status)}

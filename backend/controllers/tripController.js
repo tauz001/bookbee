@@ -172,23 +172,23 @@ const trip = new Trip({
   /**
    * Get trips hosted by current user
    */
-  static async getMyTrips(req, res, next) {
-    try {
-      // Check authentication
-      if (!req.session.userId) {
-        return sendBadRequest(res, "Authentication required");
-      }
+  // static async getMyTrips(req, res, next) {
+  //   try {
+  //     // Check authentication
+  //     if (!req.session.userId) {
+  //       return sendBadRequest(res, "Authentication required");
+  //     }
 
-      const trips = await Trip.find({ 
-        hostId: req.session.userId,
-        isActive: true 
-      }).sort({ createdAt: -1 });
+  //     const trips = await Trip.find({ 
+  //       hostId: req.session.userId,
+  //       isActive: true 
+  //     }).sort({ createdAt: -1 });
 
-      sendSuccess(res, trips, "Your trips retrieved successfully");
-    } catch (error) {
-      next(error);
-    }
-  }
+  //     sendSuccess(res, trips, "Your trips retrieved successfully");
+  //   } catch (error) {
+  //     next(error);
+  //   }
+  // }
   static async getMyTrips(req, res, next) {
   try {
     // Check authentication
@@ -204,7 +204,7 @@ const trip = new Trip({
       hostId: req.session.userId,
       isActive: true 
     })
-    .populate('hostId', 'name mobile userType') // ADD populate
+    .populate('hostId', 'name mobile userType')
     .sort({ createdAt: -1 });
 
     sendSuccess(res, trips, "Your trips retrieved successfully");

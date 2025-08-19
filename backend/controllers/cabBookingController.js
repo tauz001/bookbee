@@ -26,13 +26,16 @@ class CabBookingController {
       }
 
       // Create booking
-      const booking = new CabBooking({
-        pickupCity,
-        exactPickup,
-        dateTime: new Date(dateTime),
-        tripId: hostedTripId,
-        userId: req.session.userId
-      });
+      const booking = new SeatBooking({
+  pickupCity,
+  exactPickup,
+  dropCity,
+  exactDrop,
+  tripDate: new Date(onDate),
+  numberOfSeats,
+  tripId: hostedTripId,  // 👈 This should be hostedTripId, not tripId
+  userId: req.session.userId
+});
 
       const savedBooking = await booking.save();
       await savedBooking.populate('tripId');
@@ -92,6 +95,38 @@ class CabBookingController {
     }
 
     sendSuccess(res, booking, "Cab booking retrieved successfully");
+  } catch (error) {
+    next(error);
+  }
+}
+
+/**
+ * Get cab bookings for host's trips
+ */
+static async getHostCabBookings(req, res, next) {
+  try {
+    if (!req.session.userId) {
+      return sendBadRequest(res, "Authentication required");
+    }
+
+    // Get host's trips first
+    const Trip = require("../models/Trip");
+    const hostTrips = await Trip.find({ hostId: req.session.userId });
+    const tripIds = hostTrips.map(trip => trip._id);
+
+    // Get bookings for host's trips
+    const bookings = await CabBooking.find({ tripId: { $in: tripIds } })
+      .populate({
+        path: 'tripId',
+        populate: {
+          path: 'hostId',
+          select: 'name mobile userType'
+        }
+      })
+      .populate('userId', 'name mobile')
+      .sort({ createdAt: -1 });
+
+    sendSuccess(res, bookings, "Host cab bookings retrieved successfully");
   } catch (error) {
     next(error);
   }

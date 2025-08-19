@@ -110,6 +110,38 @@ class SeatBookingController {
   }
 }
 
+/**
+ * Get seat bookings for host's trips
+ */
+static async getHostSeatBookings(req, res, next) {
+  try {
+    if (!req.session.userId) {
+      return sendBadRequest(res, "Authentication required");
+    }
+
+    // Get host's trips first
+    const Trip = require("../models/Trip");
+    const hostTrips = await Trip.find({ hostId: req.session.userId });
+    const tripIds = hostTrips.map(trip => trip._id);
+
+    // Get bookings for host's trips
+    const bookings = await SeatBooking.find({ tripId: { $in: tripIds } })
+      .populate({
+        path: 'tripId',
+        populate: {
+          path: 'hostId',
+          select: 'name mobile userType'
+        }
+      })
+      .populate('userId', 'name mobile')
+      .sort({ createdAt: -1 });
+
+    sendSuccess(res, bookings, "Host seat bookings retrieved successfully");
+  } catch (error) {
+    next(error);
+  }
+}
+
   /**
    * Update seat booking status
    */

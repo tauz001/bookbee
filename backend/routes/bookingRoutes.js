@@ -20,5 +20,9 @@ router.post("/cabs", requireAuth, CabBookingController.createCabBooking);
 router.get("/cabs", requireAuth, CabBookingController.getAllCabBookings);
 router.get("/cabs/:id", requireAuth, CabBookingController.getCabBookingById);
 router.put("/cabs/:id", requireAuth, CabBookingController.updateCabBooking);
+// Add these routes AFTER the existing ones
+// Host-specific booking routes
+// router.get("/host/seats", requireAuth, requireHost, SeatBookingController.getHostSeatBookings);
+// router.get("/host/cabs", requireAuth, requireHost, CabBookingController.getHostCabBookings);
 
 module.exports = router;

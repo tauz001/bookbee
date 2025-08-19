@@ -8,13 +8,14 @@ const router = express.Router();
  * Base path: /api/trips
  */
 
-router.post("/", requireAuth, requireHost, TripController.createTrip);  // ADD requireAuth, requireHost
-router.put("/:id", requireAuth, TripController.updateTrip);  // ADD requireAuth
-router.delete("/:id", requireAuth, TripController.deleteTrip);  // ADD requireAuth
-router.get("/my-trips", requireAuth, requireHost, TripController.getMyTrips);  // ADD requireAuth, requireHost
+// Protected routes (order matters - specific routes first)
+router.get("/my-trips", requireAuth, requireHost, TripController.getMyTrips);
+router.post("/", requireAuth, requireHost, TripController.createTrip);
+router.put("/:id", requireAuth, TripController.updateTrip);
+router.delete("/:id", requireAuth, TripController.deleteTrip);
 
+// Public routes
 router.get("/", TripController.getAllTrips);
 router.get("/:id", TripController.getTripById);
-router.get("/my-trips", requireAuth, requireHost, TripController.getMyTrips);
 
 module.exports = router;
