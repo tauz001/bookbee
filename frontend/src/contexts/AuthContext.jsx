@@ -1,3 +1,4 @@
+// REPLACE the entire AuthContext.jsx with this enhanced version
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { AuthService } from '../services/authService';
 
@@ -14,6 +15,7 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [initializing, setInitializing] = useState(true);
 
   useEffect(() => {
     checkAuthStatus();
@@ -21,44 +23,61 @@ export const AuthProvider = ({ children }) => {
 
   const checkAuthStatus = async () => {
     try {
+      setLoading(true);
       const userData = await AuthService.checkAuth();
       setUser(userData);
+      console.log('✅ Auth check successful:', userData ? 'Authenticated' : 'Not authenticated');
     } catch (error) {
-      console.error('Auth check failed:', error);
+      console.error('❌ Auth check failed:', error);
       setUser(null);
     } finally {
       setLoading(false);
+      setInitializing(false);
     }
   };
 
   const login = async (credentials) => {
     try {
+      setLoading(true);
       const userData = await AuthService.login(credentials);
       setUser(userData);
+      console.log('✅ Login successful');
       return userData;
     } catch (error) {
+      console.error('❌ Login failed:', error);
       throw error;
+    } finally {
+      setLoading(false);
     }
   };
 
   const signup = async (userData) => {
     try {
+      setLoading(true);
       const user = await AuthService.signup(userData);
       setUser(user);
+      console.log('✅ Signup successful');
       return user;
     } catch (error) {
+      console.error('❌ Signup failed:', error);
       throw error;
+    } finally {
+      setLoading(false);
     }
   };
 
   const logout = async () => {
     try {
+      setLoading(true);
       await AuthService.logout();
       setUser(null);
+      console.log('✅ Logout successful');
     } catch (error) {
-      console.error('Logout failed:', error);
+      console.error('❌ Logout failed:', error);
       // Still clear user state even if logout request fails
       setUser(null);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -68,9 +87,11 @@ export const AuthProvider = ({ children }) => {
     signup,
     logout,
     loading,
+    initializing,
     isAuthenticated: !!user,
     isHost: user?.userType === 'host',
-    isCommuter: user?.userType === 'commuter'
+    isCommuter: user?.userType === 'commuter',
+    checkAuthStatus // Expose for manual refresh
   };
 
   return (

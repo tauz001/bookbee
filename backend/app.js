@@ -19,6 +19,7 @@ connectDatabase();
 
 // Session configuration MUST be before CORS
 app.use(session({
+  name: 'bookbee-session', // ADD THIS - explicit cookie name
   secret: process.env.SESSION_SECRET || 'bookbee-session-secret-key-make-it-very-long-and-random',
   resave: false,
   saveUninitialized: false,
@@ -26,7 +27,7 @@ app.use(session({
     secure: false, // Set to true only in production with HTTPS
     httpOnly: true,
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
-    sameSite: 'lax' // ADD THIS
+    sameSite: 'lax'
   }
 }));
 

@@ -6,6 +6,9 @@ import { NavLink } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext'; // ADD THIS
 import { APP_ROUTES } from '../../config/constants';
 import ProfileDropdown from '../common/ProfileDropdown';
+import LoginModal from '../auth/LoginModal';
+import SignupModal from '../auth/SignupModal';
+
 
 const Navbar = () => {
   const { user, isAuthenticated, isHost, logout } = useAuth(); // ADD THIS
@@ -44,6 +47,21 @@ const Navbar = () => {
       console.error('Logout failed:', error);
     }
   };
+
+  const handleSwitchToSignup = () => {
+  setIsLoginModalOpen(false);
+  setIsSignUpModalOpen(true);
+};
+
+const handleSwitchToLogin = () => {
+  setIsSignUpModalOpen(false);
+  setIsLoginModalOpen(true);
+};
+
+const handleCloseModals = () => {
+  setIsLoginModalOpen(false);
+  setIsSignUpModalOpen(false);
+};
 
   return (
     <nav className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
@@ -139,6 +157,16 @@ const Navbar = () => {
           </div>
         </div>
       </div>
+      <LoginModal 
+  isOpen={isLoginModalOpen} 
+  onClose={handleCloseModals}
+  onSwitchToSignup={handleSwitchToSignup}
+/>
+<SignupModal 
+  isOpen={isSignUpModalOpen} 
+  onClose={handleCloseModals}
+  onSwitchToLogin={handleSwitchToLogin}
+/>
     </nav>
   );
 };

@@ -27,19 +27,48 @@ function App() {
             <Routes>
               <Route path={APP_ROUTES.HOME} element={<HomePage />} />
               
-              <Route path={APP_ROUTES.TRIPS} element={<TripsListPage />} />
-              <Route path={APP_ROUTES.BOOKINGS} element={<BookingsListPage />} />
-              <Route path="/book/:tripId" element={<ProtectedRoute requireAuth={true}><BookingFormPage /></ProtectedRoute>} />
-              <Route path="/bookings/:type/:id" element={<BookingDetailsPage />} />
-              <Route path={APP_ROUTES.HOST_NEW} element={<ProtectedRoute requireAuth={true} requireHost={true}><CreateTripPage /></ProtectedRoute>} />
-              <Route path="/profile" element={<ProfilePage />} />
-              <Route path={APP_ROUTES.HOST_TRIPS} element={<HostTripsListPage />} />
-              <Route path={APP_ROUTES.HOST_DASHBOARD} element={<HostDashboard />} />
+<Route path={APP_ROUTES.TRIPS} element={<TripsListPage />} />    
+<Route path={APP_ROUTES.BOOKINGS} element={
+  <ProtectedRoute requireAuth={true}>
+    <BookingsListPage />
+  </ProtectedRoute>
+} />           
+<Route path="/book/:tripId" element={
+  <ProtectedRoute requireAuth={true}>
+    <BookingFormPage />
+  </ProtectedRoute>
+} />
+<Route path="/bookings/:type/:id" element={
+  <ProtectedRoute requireAuth={true}>
+    <BookingDetailsPage />
+  </ProtectedRoute>
+} />
+<Route path={APP_ROUTES.HOST_NEW} element={
+  <ProtectedRoute requireAuth={true} requireHost={true}>
+    <CreateTripPage />
+  </ProtectedRoute>
+} />
+<Route path="/profile" element={
+  <ProtectedRoute requireAuth={true}>
+    <ProfilePage />
+  </ProtectedRoute>
+} />
+<Route path={APP_ROUTES.HOST_TRIPS} element={
+  <ProtectedRoute requireAuth={true} requireHost={true}>
+    <HostTripsListPage />
+  </ProtectedRoute>
+} />
+<Route path={APP_ROUTES.HOST_DASHBOARD} element={
+  <ProtectedRoute requireAuth={true} requireHost={true}>
+    <HostDashboard />
+  </ProtectedRoute>
+} />
               
               <Route path="/terms-of-service" element={<TermsOfServicePage />} />
               <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
               <Route path="/cookie-policy" element={<CookiePolicyPage />} />
               <Route path="*" element={<NotFoundPage />} />
+              
             </Routes>
           </main>
         </div>

@@ -189,6 +189,29 @@ const trip = new Trip({
       next(error);
     }
   }
+  static async getMyTrips(req, res, next) {
+  try {
+    // Check authentication
+    if (!req.session.userId) {
+      return sendBadRequest(res, "Authentication required");
+    }
+
+    if (req.session.userType !== 'host') {
+      return sendBadRequest(res, "Host access required");
+    }
+
+    const trips = await Trip.find({ 
+      hostId: req.session.userId,
+      isActive: true 
+    })
+    .populate('hostId', 'name mobile userType') // ADD populate
+    .sort({ createdAt: -1 });
+
+    sendSuccess(res, trips, "Your trips retrieved successfully");
+  } catch (error) {
+    next(error);
+  }
+}
 }
 
 module.exports = TripController;

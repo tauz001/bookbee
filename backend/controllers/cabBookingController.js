@@ -49,16 +49,18 @@ class CabBookingController {
    */
   static async getAllCabBookings(req, res, next) {
   try {
-     // Check if user is authenticated
+    // Check if user is authenticated
     if (!req.session.userId) {
       return sendBadRequest(res, "Authentication required");
     }
-    const bookings = await CabBooking.find()
+    
+    // FIXED: Only return user's own bookings
+    const bookings = await CabBooking.find({ userId: req.session.userId })
       .populate({
         path: 'tripId',
         populate: {
           path: 'hostId',
-          select: 'name mobile userType' // Add host info
+          select: 'name mobile userType'
         }
       })
       .sort({ createdAt: -1 });

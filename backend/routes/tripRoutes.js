@@ -15,5 +15,6 @@ router.get("/my-trips", requireAuth, requireHost, TripController.getMyTrips);  /
 
 router.get("/", TripController.getAllTrips);
 router.get("/:id", TripController.getTripById);
+router.get("/my-trips", requireAuth, requireHost, TripController.getMyTrips);
 
 module.exports = router;

@@ -84,19 +84,19 @@ class AuthController {
    * User Logout
    */
   static async logout(req, res, next) {
-    try {
-      req.session.destroy((err) => {
-        if (err) {
-          return sendServerError(res, "Could not log out");
-        }
-        
-        res.clearCookie('connect.sid'); // Default session cookie name
-        sendSuccess(res, null, "Logged out successfully");
-      });
-    } catch (error) {
-      next(error);
-    }
+  try {
+    req.session.destroy((err) => {
+      if (err) {
+        return sendServerError(res, "Could not log out");
+      }
+      
+      res.clearCookie('bookbee-session'); // FIXED: Use correct cookie name
+      sendSuccess(res, null, "Logged out successfully");
+    });
+  } catch (error) {
+    next(error);
   }
+}
 
   /**
    * Get current user profile
