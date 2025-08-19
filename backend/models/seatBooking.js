@@ -56,7 +56,13 @@ const seatBookingSchema = new mongoose.Schema({
     type: String,
     enum: ["confirmed", "cancelled", "completed"],
     default: "confirmed"
-  }
+  },
+  // Add this field to both schemas:
+userId: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: "User",
+  required: [true, "User reference is required"]
+}
 }, {
   timestamps: true
 });

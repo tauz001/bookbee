@@ -8,11 +8,6 @@ const tripSchema = new mongoose.Schema(
       ref: "User",
       required: [true, "Host reference is required"]
     },
-    // hostName: {
-    //   type: mongoose.Schema.Types.String.,
-    //   ref: "User",
-    //   required: [true, "Host reference is required"]
-    // },
     hostName: {
       type: String,
       required: [true, "Host name is required"],

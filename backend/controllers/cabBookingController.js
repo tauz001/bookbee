@@ -1,4 +1,4 @@
-const CabBooking = require("../models/CabBooking");
+const CabBooking = require("../models/cabBooking");
 const Trip = require("../models/Trip");
 const { sendSuccess, sendCreated, sendNotFound, sendBadRequest, sendServerError } = require("../utils/responseHelper");
 
@@ -30,7 +30,8 @@ class CabBookingController {
         pickupCity,
         exactPickup,
         dateTime: new Date(dateTime),
-        tripId: hostedTripId
+        tripId: hostedTripId,
+        userId: req.session.userId
       });
 
       const savedBooking = await booking.save();
@@ -48,6 +49,10 @@ class CabBookingController {
    */
   static async getAllCabBookings(req, res, next) {
   try {
+     // Check if user is authenticated
+    if (!req.session.userId) {
+      return sendBadRequest(res, "Authentication required");
+    }
     const bookings = await CabBooking.find()
       .populate({
         path: 'tripId',

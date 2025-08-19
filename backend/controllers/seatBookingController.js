@@ -43,7 +43,8 @@ class SeatBookingController {
         exactDrop,
         tripDate: new Date(onDate),
         tripId: hostedTripId,
-        numberOfSeats
+        numberOfSeats,
+        userId: req.session.userId
       });
 
       const savedBooking = await booking.save();
@@ -61,6 +62,10 @@ class SeatBookingController {
    */
   static async getAllSeatBookings(req, res, next) {
   try {
+     // Check if user is authenticated
+    if (!req.session.userId) {
+      return sendBadRequest(res, "Authentication required");
+    }
     const bookings = await SeatBooking.find()
       .populate({
         path: 'tripId',

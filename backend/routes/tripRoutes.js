@@ -1,4 +1,5 @@
 const express = require("express");
+const { requireAuth, requireHost } = require("../middleware/authMiddleware");
 const TripController = require("../controllers/tripController");
 const router = express.Router();
 
@@ -7,22 +8,12 @@ const router = express.Router();
  * Base path: /api/trips
  */
 
-// Create new trip
-router.post("/", TripController.createTrip);
+router.post("/", requireAuth, requireHost, TripController.createTrip);  // ADD requireAuth, requireHost
+router.put("/:id", requireAuth, TripController.updateTrip);  // ADD requireAuth
+router.delete("/:id", requireAuth, TripController.deleteTrip);  // ADD requireAuth
+router.get("/my-trips", requireAuth, requireHost, TripController.getMyTrips);  // ADD requireAuth, requireHost
 
-// Get all trips
 router.get("/", TripController.getAllTrips);
-
-// Get trip by ID
 router.get("/:id", TripController.getTripById);
-
-// Update trip
-router.put("/:id", TripController.updateTrip);
-
-// Delete (deactivate) trip
-router.delete("/:id", TripController.deleteTrip);
-
-// Get trips by host ID
-router.get("/host/my-trips", TripController.getMyTrips); // ADD THIS
 
 module.exports = router;

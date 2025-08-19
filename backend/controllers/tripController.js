@@ -1,4 +1,5 @@
 const Trip = require("../models/Trip");
+const User = require("../models/user");  // ADD THIS LINE
 const { sendSuccess, sendCreated, sendNotFound, sendBadRequest, sendServerError } = require("../utils/responseHelper");
 
 /**
@@ -35,23 +36,28 @@ class TripController {
       } = req.body;
 
       // Create trip with nested vehicle object and host reference
-      const trip = new Trip({
-        pickupCity,
-        exactPickup,
-        exactDrop,
-        dropCity,
-        seatFare,
-        kmRate,
-        date,
-        vehicle: {
-          model,
-          number,
-          type,
-          seats
-        },
-        hostId: req.session.userId,
-        // hostName: req.session.name 
-      });
+     const user = await User.findById(req.session.userId);
+if (!user) {
+  return sendBadRequest(res, "User not found");
+}
+
+const trip = new Trip({
+  pickupCity,
+  exactPickup,
+  exactDrop,
+  dropCity,
+  seatFare,
+  kmRate,
+  date,
+  vehicle: {
+    model,
+    number,
+    type,
+    seats
+  },
+  hostId: req.session.userId,
+  hostName: user.name  // ADD THIS LINE
+});
 
       const savedTrip = await trip.save();
       sendCreated(res, savedTrip, "Trip created successfully");
