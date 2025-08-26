@@ -26,10 +26,9 @@ export const AuthProvider = ({ children }) => {
       setLoading(true);
       const userData = await AuthService.checkAuth();
       setUser(userData);
-      console.log('✅ Auth check successful:', userData ? 'Authenticated' : 'Not authenticated');
     } catch (error) {
-      console.error('❌ Auth check failed:', error);
       setUser(null);
+      throw new Error('Authentication check failed');
     } finally {
       setLoading(false);
       setInitializing(false);
@@ -41,11 +40,9 @@ export const AuthProvider = ({ children }) => {
       setLoading(true);
       const userData = await AuthService.login(credentials);
       setUser(userData);
-      console.log('✅ Login successful');
       return userData;
     } catch (error) {
-      console.error('❌ Login failed:', error);
-      throw error;
+      throw new Error('Login failed: ' + error.message);
     } finally {
       setLoading(false);
     }

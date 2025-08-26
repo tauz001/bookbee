@@ -45,8 +45,26 @@ const BookingFormPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Check if formData exists and has required fields
-    console.log('Submitting Form Data:', formData);
+    try {
+      setSubmitting(true);
+      setError(null);
+
+      if (!formData) {
+        throw new Error('Please fill in the booking details');
+      }
+
+      const response = await userBookingOnServer({
+        ...formData,
+        hostedTripId: tripId,
+        bookingType
+      });
+
+      navigate(APP_ROUTES.BOOKINGS_LIST);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSubmitting(false);
+    }
     
     if (!formData) {
       alert('Please fill all required fields.');

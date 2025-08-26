@@ -1,32 +1,33 @@
-import {useState, useEffect} from "react"
-import {getHostedTrips} from "../../services/hostService"
-import {LuArrowRightLeft} from "react-icons/lu"
-import {FaEdit, FaTrash} from "react-icons/fa" // Import edit and delete icons
-import productionImage from "../../assets/production.jpg"
-import {useNavigate} from "react-router-dom"
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { getHostedTrips, deleteTrip } from '../../services/hostService';
+import HostTripCard from '../../components/trip/HostTripCard';
+import LoadingSpinner from '../../components/common/LoadingSpinner';
+import ErrorMessage from '../../components/common/ErrorMessage';
 
 const HostTripList = () => {
-  const [trips, setTrips] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-  const navigate = useNavigate()
+  const [trips, setTrips] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const navigate = useNavigate();
+
+  const fetchTrips = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await getHostedTrips();
+      setTrips(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchTrips = async () => {
-      try {
-        const data = await getHostedTrips()
-        console.log("Fetched trips:", data) // Debug log
-        setTrips(data)
-      } catch (err) {
-        console.error("Error:", err) // Debug log
-        setError(err.message)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchTrips()
-  }, [])
+    fetchTrips();
+  }, []);
 
   const handleEdit = tripId => {
     navigate(`/host/trips/${tripId}/edit`)
@@ -37,79 +38,64 @@ const HostTripList = () => {
     // Will implement delete functionality later
   }
 
-  if (loading) return <div className="container mx-auto p-4">Loading trips...</div>
-  if (error) return <div className="container mx-auto p-4 text-red-500">Error: {error}</div>
-  if (!trips.length) return <div className="container mx-auto p-4">No trips available</div>
+  if (loading) {
+    return (
+      <div className="container mx-auto p-4 flex justify-center">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto p-4">
+        <ErrorMessage message={error} />
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h2 className="text-2xl font-bold mb-6">Your Hosted Trips</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {trips.map(trip => (
-          <div key={trip._id} className="bg-white rounded-xl shadow-lg overflow-hidden">
-            {/* Image Container */}
-            <div className="relative h-48">
-              <img src={productionImage} alt="Vehicle" className="w-full h-full object-cover" />
-              <div className="absolute top-2 right-2 flex gap-2">
-                <button onClick={() => handleEdit(trip._id)} className="flex items-center gap-1 px-3 py-1.5 bg-white rounded-lg shadow-md hover:bg-gray-50 transition-colors">
-                  <FaEdit className="text-blue-600" />
-                  <span className="text-sm text-blue-600 font-medium">Edit</span>
-                </button>
-                <button onClick={() => handleDelete(trip._id)} className="flex items-center gap-1 px-3 py-1.5 bg-white rounded-lg shadow-md hover:bg-gray-50 transition-colors">
-                  <FaTrash className="text-red-600" />
-                  <span className="text-sm text-red-600 font-medium">Delete</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Content Container */}
-            <div className="p-5 space-y-4">
-              {/* Trip Route */}
-              <h3 className="font-bold text-lg flex items-center gap-2">
-                <span className="truncate">{trip.pickupCity}</span>
-                <LuArrowRightLeft className="flex-shrink-0 text-gray-500" />
-                <span className="truncate">{trip.dropCity}</span>
-              </h3>
-              {/* Trip Details */}
-              <div>
-                <p className="text-sm text-gray-500 mb-1">Pickup Points:</p>
-                <div className="flex flex-wrap gap-2">
-                  {trip.exactPickup.map((point, idx) => (
-                    <span key={idx} className="inline-block bg-yellow-100 text-yellow-800 text-xs font-medium px-3 py-1 rounded-full">
-                      {point}
-                    </span>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500 mt-3 mb-1">Drop Points:</p>
-                <div className="flex flex-wrap gap-2">
-                  {trip.exactDrop.map((point, idx) => (
-                    <span key={idx} className="inline-block bg-blue-100 text-blue-800 text-xs font-medium px-3 py-1 rounded-full">
-                      {point}
-                    </span>
-                  ))}
-                </div>
-              </div>
-              <p>Hosted on: {new Date(trip.createdAt).toLocaleDateString()}</p>
-              <p>Last Updated: {new Date(trip.updatedAt).toLocaleDateString()}</p>
-
-              {/* Status and Price */}
-              <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                <div>
-                  <p className="text-sm text-gray-500">Price per seat</p>
-                  <p className="font-bold text-xl text-blue-600">₹{trip.seatFare}</p>
-                  <p className="text-sm text-gray-500">Rate per KM</p>
-                  <p className="font-bold text-xl text-blue-600">₹{trip.kmRate}</p>
-                </div>
-                <span className="bg-green-100 text-green-800 text-sm px-3 py-1 rounded-full">Active</span>
-              </div>
-            </div>
-          </div>
-        ))}
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold">Your Hosted Trips</h2>
+        <button
+          onClick={() => navigate('/host/trips/create')}
+          className="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition-colors"
+        >
+          Create New Trip
+        </button>
       </div>
+
+      {trips.length === 0 ? (
+        <div className="text-center py-8">
+          <p className="text-gray-500 mb-4">No trips available</p>
+          <button
+            onClick={() => navigate('/host/trips/create')}
+            className="text-yellow-500 hover:text-yellow-600"
+          >
+            Create your first trip
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {trips.map((trip) => (
+            <HostTripCard
+              key={trip._id}
+              trip={trip}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
+          ))}
+        </div>
+      )}
+
+      {isDeleting && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <LoadingSpinner />
+        </div>
+      )}
     </div>
-  )
-}
+  );
+};
 
 export default HostTripList

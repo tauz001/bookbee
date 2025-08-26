@@ -1,7 +1,10 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import PropTypes from 'prop-types';
 
 const ProtectedRoute = ({ children, requireHost = false, fallback }) => {
+  const navigate = useNavigate();
   const { isAuthenticated, isHost, loading } = useAuth();
 
   if (loading) {
@@ -18,12 +21,12 @@ const ProtectedRoute = ({ children, requireHost = false, fallback }) => {
         <div className="max-w-md mx-auto">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Login Required</h2>
           <p className="text-gray-600 mb-6">You need to be logged in to access this page.</p>
-          <a 
-            href="/" 
+          <button 
+            onClick={() => navigate('/')}
             className="inline-block bg-amber-500 text-white px-6 py-3 rounded-lg hover:bg-amber-600 transition-colors"
           >
             Go to Login
-          </a>
+          </button>
         </div>
       </div>
     );
@@ -47,6 +50,12 @@ const ProtectedRoute = ({ children, requireHost = false, fallback }) => {
   }
 
   return children;
+};
+
+ProtectedRoute.propTypes = {
+  children: PropTypes.node.isRequired,
+  requireHost: PropTypes.bool,
+  fallback: PropTypes.node
 };
 
 export default ProtectedRoute;

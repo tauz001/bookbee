@@ -83,7 +83,7 @@ const TripCard = ({ trip, onBook, onEdit, onDelete, showActions = false }) => {
       {/* Host Info */}
       <div className="flex items-center gap-2 text-gray-600 mb-4">
         <FaUser className="text-gray-400" />
-        <span className="text-sm">Hosted by @user123</span>
+        <span className="text-sm">Hosted by {trip.hostName}</span>
         <span className="ml-auto text-yellow-500 text-sm">★ 4.5</span>
       </div>
 

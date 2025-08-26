@@ -12,18 +12,20 @@ const CreateTripPage = () => {
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
-    pickupCity: 'shahganj',
+    pickupCity: '',
     exactPickup: '',
-    dropCity: 'lucknow',
+    dropCity: '',
     exactDrop: '',
     seatFare: '',
     kmRate: '',
     date: '',
-    model: 'Toyota Innova',
+    model: '',
     number: '',
-    type: 'SUV',
-    seats: '4'
+    type: '',
+    seats: ''
   });
+  
+  const [errors, setErrors] = useState({});
 
   // Form configuration
   const cities = ['Shahganj', 'Lucknow'];

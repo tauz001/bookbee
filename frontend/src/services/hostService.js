@@ -55,10 +55,17 @@ export const hostTripToServer = async (pickupCity, exactPickup, exactDrop, dropC
 
 export const getHostedTrips = async () => {
   try {
-    const response = await fetchWithConfig(`${API_BASE_URL}/trips`);
+    const response = await fetchWithConfig(`${API_BASE_URL}/trips/my-trips`);
     
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      let errorMessage = `HTTP error! status: ${response.status}`;
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.message || errorMessage;
+      } catch {
+        errorMessage = response.statusText || errorMessage;
+      }
+      throw new Error(errorMessage);
     }
     
     const result = await response.json();

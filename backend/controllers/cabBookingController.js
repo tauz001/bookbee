@@ -25,17 +25,29 @@ class CabBookingController {
         return sendNotFound(res, "Trip not found or inactive");
       }
 
+      // Check for duplicate booking
+      const bookingTime = new Date(dateTime);
+      const existingBooking = await CabBooking.findOne({
+        userId: req.session.userId,
+        tripId: hostedTripId,
+        dateTime: {
+          $gte: new Date(bookingTime.getTime() - 5 * 60000), // 5 minutes before
+          $lte: new Date(bookingTime.getTime() + 5 * 60000)  // 5 minutes after
+        }
+      });
+
+      if (existingBooking) {
+        return sendBadRequest(res, "A similar booking already exists within 5 minutes of this time");
+      }
+
       // Create booking
-      const booking = new SeatBooking({
-  pickupCity,
-  exactPickup,
-  dropCity,
-  exactDrop,
-  tripDate: new Date(onDate),
-  numberOfSeats,
-  tripId: hostedTripId,  // 👈 This should be hostedTripId, not tripId
-  userId: req.session.userId
-});
+      const booking = new CabBooking({
+        pickupCity,
+        exactPickup,
+        dateTime: new Date(dateTime),
+        tripId: hostedTripId,
+        userId: req.session.userId
+      });
 
       const savedBooking = await booking.save();
       await savedBooking.populate('tripId');

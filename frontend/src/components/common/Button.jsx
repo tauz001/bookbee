@@ -2,6 +2,7 @@
  * Reusable button component
  */
 import React from 'react';
+import PropTypes from 'prop-types';
 
 const Button = ({
   children,
@@ -44,6 +45,17 @@ const Button = ({
       {children}
     </button>
   );
+};
+
+Button.propTypes = {
+  children: PropTypes.node.isRequired,
+  variant: PropTypes.oneOf(['primary', 'secondary', 'outline', 'danger', 'ghost']),
+  size: PropTypes.oneOf(['sm', 'md', 'lg']),
+  className: PropTypes.string,
+  disabled: PropTypes.bool,
+  loading: PropTypes.bool,
+  onClick: PropTypes.func,
+  type: PropTypes.oneOf(['button', 'submit', 'reset']),
 };
 
 export default Button;

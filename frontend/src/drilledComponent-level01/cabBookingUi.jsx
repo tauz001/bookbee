@@ -15,9 +15,12 @@ const CabBookingUi = ({selectedTripDetails, onFormDataChange}) => {
     const pickupCityOrigin = exactPickup.includes(selectedPickup) ? pickupCity : dropCity
 
     onFormDataChange({
-      pickupCity: pickupCityOripDetails._id,
+      pickupCity: pickupCityOrigin,
+      exactPickup: selectedPickup,
+      dateTime,
+      hostedTripId: selectedTripDetails._id
     })
-  }, [selectedPickup, dateTime, selectedTripDetails])
+  }, [selectedPickup, dateTime, selectedTripDetails, pickupCity, dropCity, exactPickup])
 
   return (
     <div className="flex flex-col gap-4">

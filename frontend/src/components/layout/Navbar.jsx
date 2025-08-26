@@ -3,7 +3,8 @@
  */
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext'; // ADD THIS
+import PropTypes from 'prop-types';
+import { useAuth } from '../../contexts/AuthContext';
 import { APP_ROUTES } from '../../config/constants';
 import ProfileDropdown from '../common/ProfileDropdown';
 import LoginModal from '../auth/LoginModal';
@@ -11,6 +12,10 @@ import SignupModal from '../auth/SignupModal';
 
 // Add the SuccessModal component
 const SuccessModal = ({ isOpen, onClose, modalType, modalMessage }) => {
+  if (typeof isOpen !== 'boolean') {
+    console.warn('SuccessModal: isOpen prop should be a boolean');
+    return null;
+  }
   if (!isOpen) return null;
 
   return (

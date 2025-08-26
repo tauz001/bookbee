@@ -17,12 +17,28 @@ export class BookingService {
   /**
    * Create a new booking (seat or cab)
    */
+  // Track ongoing bookings to prevent duplicates
+  static #ongoingBookings = new Set();
+
   static async createBooking(bookingData) {
+    const bookingKey = JSON.stringify({
+      type: bookingData.bookingType,
+      tripId: bookingData.hostedTripId,
+      dateTime: bookingData.dateTime
+    });
+
+    // Check if this booking is already in progress
+    if (this.#ongoingBookings.has(bookingKey)) {
+      throw new Error("A similar booking is already in progress");
+    }
+
     const endpoint = bookingData.bookingType === "reserveSeat" 
       ? `${API_BASE_URL}/bookings/seats`
       : `${API_BASE_URL}/bookings/cabs`;
     
     try {
+      // Add to ongoing bookings
+      this.#ongoingBookings.add(bookingKey);
       console.log('🔄 Creating booking...', bookingData);
       
       const { tripId, hostedTripId, bookingType, ...cleanPayload } = bookingData;
@@ -52,6 +68,9 @@ export class BookingService {
     } catch (error) {
       console.error('❌ Booking error:', error);
       throw error;
+    } finally {
+      // Remove from ongoing bookings regardless of success/failure
+      this.#ongoingBookings.delete(bookingKey);
     }
   }
 
